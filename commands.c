@@ -157,6 +157,7 @@ static int do_take(player_t *c, char *arg) {
         roomobj = NULL;
 
         /* add userobj to inventory and increment inventory size */
+        /* XXX: don't free userobj because it's not referenced by c->inventory */
         c->inventory[c->inventory_size++] = userobj;
 
         /* TODO: function that returns a color-coded object name string */
@@ -196,6 +197,7 @@ static int do_drop(player_t *c, char *arg) {
         free(userobj);
         userobj = NULL;
 
+        /* XXX: don't free roomobj because it's referenced by room->objects */
         room->objects[room->num_objects++] = roomobj;
 
         snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, roomobj->name);

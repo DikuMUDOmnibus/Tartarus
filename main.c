@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <assert.h>
+#include <signal.h>
 
 #include <getopt.h>
 
@@ -134,6 +135,22 @@ void client_free(player_t *c) {
     }
 }
 
+void terminate_process() {
+    signal(SIGTERM, terminate_process);
+
+    free_all_areas();
+    free_all_npcs();
+    exit(EXIT_SUCCESS);
+}
+
+void interrupt_process() {
+    signal(SIGINT, interrupt_process);
+
+    free_all_areas();
+    free_all_npcs();
+    exit(EXIT_SUCCESS);
+}
+
 void client_set_state(player_t *c, enum conn_states state) {
     assert(c != NULL);
     if (state != c->conn_state)
@@ -219,6 +236,9 @@ int main(int argc, char **argv) {
         {"port",   required_argument, 0, 'p'}
     };
 
+    signal(SIGTERM, terminate_process);
+    signal(SIGINT, interrupt_process);
+
     daemonize_process = 0;
     port = 6666;
 
@@ -263,15 +283,6 @@ int main(int argc, char **argv) {
 
     add_npc_to_room(npc_room, mobile);
     npc_table[1] = mobile;
-
-    /* run the block below when running valgrind --leak-check=full --show-reachable=yes
-     * to determine memory leaks */
-
-    /*
-    free_all_areas();
-    free_all_npcs();
-    return 0;
-    */
 
     /* load welcome screen */
     if (load_welcome_screen("data/welcome.txt") == -1)
