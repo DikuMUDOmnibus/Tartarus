@@ -232,6 +232,7 @@ void ev_socket_accept(const int fd, const short which, void *arg) {
 
     //send_to_char(c, "Welcome to DRMud!\r\nEnter your name: ");
     send_to_char(c, welcome_screen);
+    send_to_char(c, "Enter your name: ");
 
     event_set(&c->event, sfd, EV_WRITE | EV_PERSIST, ev_socket_write, c);
     event_base_set(main_base, &c->event);
@@ -495,7 +496,7 @@ static int handle_input(player_t *c) {
             snprintf(buf, MAXBUF, "\n%s has joined the game.\n", c->username);
             send_to_all_except(c, buf);
 
-            send_to_char(c, "You joined the game.\n");
+            send_to_char(c, "You've arrived in Tartarus.\n");
         } else {
             /* TODO: fix this... it's a hack for now */
             close(c->sfd);

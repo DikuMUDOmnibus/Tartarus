@@ -201,8 +201,8 @@ int main(int argc, char **argv) {
     int nbytes;
     FILE *fp;
 
-    if (NULL == (fp = fopen("data/welcome.html", "r"))) {
-        fprintf(stderr, "Can't open file: %s\n", "data/welcome.html");
+    if (NULL == (fp = fopen("data/welcome.txt", "r"))) {
+        fprintf(stderr, "Can't open file: %s\n", "data/welcome.txt");
         return -1;
     }
 
