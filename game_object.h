@@ -68,6 +68,9 @@ typedef struct {
     /* rooms can have static (non-removable) objects
      * and dynamic (removable) objects */
     bool is_static;
+
+    /* how much armor this object provides */
+    int armor;
 } game_object_t;
 
 #define MAX_GAME_OBJECTS 4096

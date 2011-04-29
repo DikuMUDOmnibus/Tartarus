@@ -106,6 +106,8 @@ int load_player_file(player_t *ch, const char *filename) {
     inv_size = json_array_size(inv);
     ch->inventory_size = inv_size;
 
+    ch->armor = json_int_from_obj_key(jsp, "armor");
+
     for (i = 0; i < inv_size; ++i) {
         json_t *js_inventory = json_array_get(inv, i);
         inv_obj = game_object_from_json(js_inventory);
@@ -143,6 +145,10 @@ static char *player_json(player_t *ch) {
 
     val = json_integer(ch->ch_state);
     json_object_set(jsp, "ch_state", val);
+    json_decref(val);
+
+    val = json_integer(ch->armor);
+    json_object_set(jsp, "armor", val);
     json_decref(val);
 
     arr = json_array();

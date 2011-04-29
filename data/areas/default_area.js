@@ -14,6 +14,7 @@
                     "is_static": 0,
                     "rarity": 2,
                     "type": 0,
+                    "armor": 0,
                     "keywords": ["nail", "bat", "nail bat"]
                 }
             ]
@@ -30,6 +31,7 @@
                     "is_static": 0,
                     "rarity": 1,
                     "type": 1,
+                    "armor": 10,
                     "keywords": ["leather", "boots", "leather boots"]
                 }
             ]

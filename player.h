@@ -82,6 +82,7 @@ typedef struct player_s {
 
     game_object_t *inventory[MAX_INVENTORY];
     int inventory_size;
+    int armor;
 } player_t;
 
 extern player_t *players;
