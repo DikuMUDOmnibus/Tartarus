@@ -26,7 +26,7 @@
             "objects": [
                 {
                     "name": "Leather Boots",
-                    "is_static": 1,
+                    "is_static": 0,
                     "rarity": 1,
                     "keywords": ["leather", "boots", "leather boots"]
                 }

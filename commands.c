@@ -147,7 +147,7 @@ static int do_take(player_t *c, char *arg) {
     room = area_table[c->area_id]->rooms[c->room_id];
     roomobj = lookup_room_object(room, arg);
 
-    if (roomobj) {
+    if (roomobj && !roomobj->is_static) {
         userobj = (game_object_t *)malloc(sizeof(game_object_t));
         memcpy(userobj, roomobj, sizeof(*roomobj));
 
@@ -165,6 +165,8 @@ static int do_take(player_t *c, char *arg) {
         send_to_room_from_char(c, buf);
         snprintf(pbuf, MAXBUF, "You take '%s'\n", userobj->name);
         send_to_char(c, pbuf);
+    } else if (roomobj && roomobj->is_static) {
+        send_to_char(c, "You can't take that.\n");
     } else {
         send_to_char(c, "You don't see anything like that.\n");
     }
