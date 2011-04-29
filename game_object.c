@@ -113,6 +113,11 @@ game_object_t *game_object_from_json(json_t *json) {
     /* XXX: should I limit armor values to just wearable armor? */
     obj->armor = json_int_from_obj_key(json, "armor");
 
+    if (obj->type == ARMOR_TYPE)
+        obj->wear_location = json_int_from_obj_key(json, "wear_location");
+    else
+        obj->wear_location = WEAR_NONE;
+
     sprintf(obj->name, "%s", json_str_from_obj_key(json, "name"));
     return obj;
 }
@@ -136,6 +141,9 @@ json_t *game_object_to_json(game_object_t *obj) {
     json_object_set(json, "name", json_string(obj->name));
     json_object_set(json, "is_static", json_integer(obj->is_static));
     json_object_set(json, "rarity", json_integer(obj->rarity));
+    json_object_set(json, "type", json_integer(obj->type));
+    json_object_set(json, "armor", json_integer(obj->armor));
+    json_object_set(json, "wear_location", json_integer(obj->wear_location));
     json_object_set(json, "keywords", keywords);
     json_decref(keywords);
 

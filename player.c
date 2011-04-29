@@ -125,7 +125,8 @@ static char *player_json(player_t *ch) {
 
     int i;
     char *res;
-    json_t *jsp, *val, *arr;
+    json_t *jsp, *val, *arr, *jsobj;
+    game_object_t *obj;
 
     jsp = json_object();
 
@@ -153,8 +154,8 @@ static char *player_json(player_t *ch) {
 
     arr = json_array();
     for (i = 0; i < ch->inventory_size; ++i) {
-        game_object_t *obj = ch->inventory[i];
-        json_t *jsobj = game_object_to_json(obj);
+        obj = ch->inventory[i];
+        jsobj = game_object_to_json(obj);
         json_array_append(arr, jsobj);
         json_decref(jsobj);
     }

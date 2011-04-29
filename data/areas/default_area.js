@@ -32,6 +32,7 @@
                     "rarity": 1,
                     "type": 1,
                     "armor": 10,
+                    "wear_location": 9,
                     "keywords": ["leather", "boots", "leather boots"]
                 }
             ]

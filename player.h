@@ -81,7 +81,10 @@ typedef struct player_s {
     int room_id;
 
     game_object_t *inventory[MAX_INVENTORY];
+//    game_object_t *equipped_armor[MAX_INVENTORY];
+
     int inventory_size;
+    int num_equipped;
     int armor;
 } player_t;
 

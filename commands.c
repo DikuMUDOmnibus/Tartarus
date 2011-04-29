@@ -81,6 +81,8 @@ static struct command_s commands[] = {
     {"t", do_take},
     {"take", do_take},
 
+    //{"wear", do_wear},
+
     {"w", do_west},
     {"west", do_west}
 };

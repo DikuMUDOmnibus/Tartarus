@@ -53,6 +53,19 @@ enum object_type {
     ARMOR_TYPE
 };
 
+enum WEAR_LOCATION {
+    WEAR_NONE = 0,
+    HEAD,
+    CHEST,
+    SHOULDERS,
+    ARMS,
+    WRISTS,
+    FINGERS,
+    WAIST,
+    LEGS,
+    FEET
+};
+
 typedef struct {
     char name[MAX_NAME_LEN];
     /* TODO: I don't think game objects need IDs simply because they are mapped with
@@ -64,6 +77,7 @@ typedef struct {
 
     enum object_rarity rarity;
     enum object_type type;
+    enum WEAR_LOCATION wear_location;
 
     /* rooms can have static (non-removable) objects
      * and dynamic (removable) objects */
