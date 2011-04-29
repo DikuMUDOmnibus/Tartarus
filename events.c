@@ -80,7 +80,7 @@ static void ev_game_tick(const int fd, const short which, void *arg) {
     evtimer_set(&game_tick, ev_game_tick, 0);
     event_base_set(main_base, &game_tick);
     evtimer_add(&game_tick, &t);
-    send_to_all("\n&CYou feel a calm breeze brush across your face.\n");
+    send_to_all("\n&RSuper-heated air from the river of fire envelops you.\n\n");
 }
 
 static void ev_mobile_tick(const int fd, const short which, void *arg) {
@@ -109,16 +109,14 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
         npc = npc_table[i];
         if (npc && npc->is_mobile) {
             npc_room(npc, &from_room);
-            //from_room = area_table[npc->area_id]->rooms[npc->room_id];
 
             for (j = 0; j < 4; ++j) {
                 /* only try to move at most 4 times */
                 dir = randint(4);
-                if (from_room->exits[dir] != -1) {
+                if (from_room->exits[dir] != -1)
                     break;
-                } else {
+                else
                     dir = -1;
-                }
             }
 
             if (dir != -1) {
@@ -230,7 +228,6 @@ void ev_socket_accept(const int fd, const short which, void *arg) {
     c->next = players;
     players = c;
 
-    //send_to_char(c, "Welcome to DRMud!\r\nEnter your name: ");
     send_to_char(c, welcome_screen);
     send_to_char(c, "Enter your name: ");
 
@@ -317,6 +314,7 @@ void ev_socket_write(const int fd, const short which, void *arg) {
      * since it's known to be ready for writing to. */
 
     char prompt[MAXBUF];
+    char writebuf[MAXBUF];
 
     int len, res, to_write;
     struct sockaddr peer;
@@ -324,11 +322,12 @@ void ev_socket_write(const int fd, const short which, void *arg) {
     player_t *c = (player_t *)arg;
     assert(c != NULL);
 
-    to_write = strlen(c->wbuf);
+    colorize_string(c->wbuf, writebuf);
+    to_write = strlen(writebuf);
 
     len = 0;
     while (len < to_write) {
-        len += write(c->sfd, c->wbuf, to_write);
+        len += write(c->sfd, writebuf, to_write);
     }
 
     /* Make sure client is still connected */
@@ -493,10 +492,10 @@ static int handle_input(player_t *c) {
             add_player_to_room(room, c);
 
             char buf[MAXBUF];
-            snprintf(buf, MAXBUF, "\n%s has joined the game.\n", c->username);
+            snprintf(buf, MAXBUF, "\n%s has entered Tartarus.\n", c->username);
             send_to_all_except(c, buf);
 
-            send_to_char(c, "You've arrived in Tartarus.\n");
+            send_to_char(c, "You've arrived in Tartarus.\n\n");
         } else {
             /* TODO: fix this... it's a hack for now */
             close(c->sfd);

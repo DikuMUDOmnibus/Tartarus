@@ -159,6 +159,26 @@ static int server_socket(int s_family, int s_type) {
     return sfd;
 }
 
+static int load_welcome_screen(const char *filename) {
+    int nbytes;
+    FILE *fp;
+
+    if (NULL == (fp = fopen(filename, "r"))) {
+        fprintf(stderr, "Can't open file: %s\n", filename);
+        return -1;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    nbytes = ftell(fp);
+    rewind(fp);
+
+    fread(welcome_screen, nbytes, 1, fp);
+    fclose(fp);
+
+    welcome_screen[nbytes] = '\0';
+    return 0;
+}
+
 int main(int argc, char **argv) {
     /* TODO: catch signals like ^C and free memory */
 
@@ -198,22 +218,8 @@ int main(int argc, char **argv) {
     */
 
     /* load welcome screen */
-    int nbytes;
-    FILE *fp;
-
-    if (NULL == (fp = fopen("data/welcome.txt", "r"))) {
-        fprintf(stderr, "Can't open file: %s\n", "data/welcome.txt");
+    if (load_welcome_screen("data/welcome.txt") == -1)
         return -1;
-    }
-
-    fseek(fp, 0, SEEK_END);
-    nbytes = ftell(fp);
-    rewind(fp);
-
-    fread(welcome_screen, nbytes, 1, fp);
-    fclose(fp);
-
-    welcome_screen[nbytes] = '\0';
 
     /* initialize command hash table */
     cmd_init();
@@ -221,7 +227,6 @@ int main(int argc, char **argv) {
     sfd = server_socket(AF_INET, SOCK_STREAM);
     ev_main_loop(sfd);
 
-    //scripting_close();
     free_all_areas();
     free_all_npcs();
     return 0;
