@@ -83,16 +83,7 @@ static struct command_s commands[] = {
     {"west", do_west}
 };
 
-static int do_quit(player_t *c, char *arg) {
-    char buf[MAXBUF];
-    snprintf(buf, MAXBUF, "\n%s quits.\n", c->username);
-    client_set_state(c, conn_closing);
-    send_to_char(c, "You quit.\n");
-    send_to_all_except(c, buf);
-    return 0;
-}
-
-static int do_save(player_t *c, char *arg) {
+static int _save(player_t *c) {
     int res;
     char *filename;
 
@@ -101,9 +92,27 @@ static int do_save(player_t *c, char *arg) {
     strlower(filename);
 
     res = save_player_file(c, filename);
-    send_to_char(c, "Saved.\n");
-
     free(filename);
+    return res;
+}
+
+static int do_quit(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    _save(c);
+    snprintf(buf, MAXBUF, "\n%s quits.\n", c->username);
+    client_set_state(c, conn_closing);
+    send_to_char(c, "You quit.\n");
+    send_to_all_except(c, buf);
+    return 0;
+}
+
+static int do_save(player_t *c, char *arg) {
+    /* TODO: atomic save. I think the way to do it is write to a tmp file
+     * and copy it over to real location */
+    int res;
+    if ((res =_save(c)) == 0)
+        send_to_char(c, "Saved.\n");
+
     return res;
 }
 
@@ -220,6 +229,8 @@ static int do_look(player_t *c, char *arg) {
         room = area_table[c->area_id]->rooms[c->room_id];
         room_description(room, c, buf);
         send_to_char(c, buf);
+    } else {
+        send_to_char(c, "What are you looking at?\n");
     }
     return 0;
 }
