@@ -29,6 +29,7 @@
  */
 
 #include <stdlib.h>
+#include <strings.h> /* strncasecmp */
 
 #include "game_object.h"
 
