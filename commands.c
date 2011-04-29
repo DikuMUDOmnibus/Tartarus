@@ -51,6 +51,8 @@ static int do_take(player_t *ch, char *arg);
 static int do_quit(player_t *ch, char *arg);
 static int do_save(player_t *ch, char *arg);
 
+static int _save(player_t *c);
+
 /* command hash table */
 static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
 
@@ -77,6 +79,7 @@ static struct command_s commands[] = {
     {"save", do_save},
     {"say", do_say},
 
+    {"t", do_take},
     {"take", do_take},
 
     {"w", do_west},

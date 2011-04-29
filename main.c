@@ -33,8 +33,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <assert.h>
+
+#include <getopt.h>
 
 #include "shared.h"
 #include "player.h"
@@ -179,10 +184,61 @@ static int load_welcome_screen(const char *filename) {
     return 0;
 }
 
+static void daemonize(void) {
+    /* TODO: use pidfile? */
+    int si, so, se;
+
+    if (fork() > 0)
+        exit(0);
+
+    setsid();
+    chdir(".");
+    umask(022);
+
+    if (fork() > 0)
+        exit(EXIT_SUCCESS);
+
+    si = open("/dev/null", O_RDONLY);
+    so = open("/dev/null", O_APPEND);
+    se = open("/dev/null", O_APPEND);
+
+    dup2(si, 0);
+    dup2(so, 1);
+    dup2(se, 2);
+}
+
 int main(int argc, char **argv) {
     /* TODO: catch signals like ^C and free memory */
 
-    int sfd;
+    int sfd, port;
+    int c, iopt;
+    int daemonize_process;
+
+    static struct option long_opts[] = {
+        {"daemon", no_argument,       0, 'd'},
+        {"port",   required_argument, 0, 'p'}
+    };
+
+    daemonize_process = 0;
+    port = 6666;
+
+    while (1) {
+        iopt = 0;
+        c = getopt_long(argc, argv, "dp:", long_opts, &iopt);
+
+        if (c == -1)
+            break;
+
+        switch (c) {
+        case 'd':
+            daemonize_process = 1;
+            break;
+
+        case 'p':
+            port = atoi(optarg);
+            break;
+        }
+    }
 
     memset(area_table, 0, sizeof(area_table));
     memset(object_table, 0, sizeof(object_table));
@@ -225,7 +281,11 @@ int main(int argc, char **argv) {
     cmd_init();
 
     sfd = server_socket(AF_INET, SOCK_STREAM);
-    ev_main_loop(sfd);
+
+    if (daemonize_process)
+        daemonize();
+
+    ev_main_loop(sfd, port);
 
     free_all_areas();
     free_all_npcs();
