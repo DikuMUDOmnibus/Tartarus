@@ -30,8 +30,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "player.h"
 #include "shared.h"
@@ -81,7 +83,7 @@ int readfile(const char *filename, char **buffer) {
 
 int load_player_file(player_t *ch, const char *filename) {
     /* takes a player_t pointer of a connected user and loads their user data */
-    char path[256];
+    char path[PATH_MAX];
     int inv_size, i;
     game_object_t *inv_obj;
     json_t *jsp, *inv;
@@ -114,11 +116,13 @@ int load_player_file(player_t *ch, const char *filename) {
     return 0;
 }
 
-int save_player_file(player_t *ch, const char *filename) {
-    /* http://www.digip.org/jansson/doc/1.0/apiref.html */
+static char *player_json(player_t *ch) {
+    /* this function returns the JSON representation of the player
+     * so it can be saved at a later time.
+     * - http://www.digip.org/jansson/doc/1.0/apiref.html */
 
-    int retval, i;
-    char path[256];
+    int i;
+    char *res;
     json_t *jsp, *val, *arr;
 
     jsp = json_object();
@@ -152,12 +156,46 @@ int save_player_file(player_t *ch, const char *filename) {
     json_object_set(jsp, "inventory", arr);
     json_decref(arr);
 
-    sprintf(path, "%s/%s.js", PLAYER_DATA_DIR, filename);
-    retval = json_dump_file(jsp, path, JSON_INDENT(4));
-
+    res = json_dumps(jsp, JSON_INDENT(4));
     json_decref(jsp);
 
-    return retval;
+    return res;
+}
+
+int save_player_file(player_t *c) {
+    /* perform an atomic write by writing to a tmpfile and mv'ing it
+     * to the proper save location if everything goes well. */
+    char *tmp, *buf;
+    char path[PATH_MAX];
+    int fd, len, nbytes;
+
+    buf = player_json(c);
+
+    tmp = (char *)malloc(strlen(c->username)+7);
+    sprintf(tmp, "%sXXXXXX", c->username);
+
+    /* actual save path */
+    snprintf(path, PATH_MAX, "%s/%s.js", PLAYER_DATA_DIR, c->username);
+    strlower(path);
+
+    fd = mkstemp(tmp);
+    if (fd == -1) {
+        perror("mkstemp");
+        return -1;
+    }
+
+    len = strlen(buf);
+    nbytes = write(fd, buf, len);
+    close(fd);
+
+    if (nbytes != len)
+        return -1;
+
+    rename(tmp, path);
+    unlink(tmp);
+    free(tmp);
+
+    return 0;
 }
 
 game_object_t *lookup_inventory_object(player_t *c, const char *key) {

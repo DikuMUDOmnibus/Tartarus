@@ -29,6 +29,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -50,8 +51,6 @@ static int do_take(player_t *ch, char *arg);
 
 static int do_quit(player_t *ch, char *arg);
 static int do_save(player_t *ch, char *arg);
-
-static int _save(player_t *c);
 
 /* command hash table */
 static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
@@ -86,22 +85,11 @@ static struct command_s commands[] = {
     {"west", do_west}
 };
 
-static int _save(player_t *c) {
-    int res;
-    char *filename;
-
-    filename = (char *)malloc(strlen(c->username)+1);
-    strcpy(filename, c->username);
-    strlower(filename);
-
-    res = save_player_file(c, filename);
-    free(filename);
-    return res;
-}
-
 static int do_quit(player_t *c, char *arg) {
     char buf[MAXBUF];
-    _save(c);
+
+    save_player_file(c);
+
     snprintf(buf, MAXBUF, "\n%s quits.\n", c->username);
     client_set_state(c, conn_closing);
     send_to_char(c, "You quit.\n");
@@ -110,10 +98,8 @@ static int do_quit(player_t *c, char *arg) {
 }
 
 static int do_save(player_t *c, char *arg) {
-    /* TODO: atomic save. I think the way to do it is write to a tmp file
-     * and copy it over to real location */
     int res;
-    if ((res =_save(c)) == 0)
+    if ((res = save_player_file(c)) == 0)
         send_to_char(c, "Saved.\n");
 
     return res;
