@@ -61,6 +61,11 @@ npc_t *npc_table[MAX_NPCS];
 
 char welcome_screen[MAXBUF];
 
+static int server_socket(int s_family, int s_type);
+static int load_welcome_screen(const char *filename);
+static void load_areas(void);
+static void load_npcs(void);
+
 void room_free(room_t *room) {
     int i;
     if (room) {
@@ -201,6 +206,34 @@ static int load_welcome_screen(const char *filename) {
     return 0;
 }
 
+static void load_areas(void) {
+    memset(area_table, 0, sizeof(area_table));
+    memset(object_table, 0, sizeof(object_table));
+
+    area_t *area;
+    area = (area_t *)malloc(sizeof(area_t));
+    load_area_file(area, "default_area.js");
+    area_table[area->id] = area;
+}
+
+static void load_npcs(void) {
+    /* proof-of-concept */
+    npc_t *simple, *mobile;
+
+    simple = (npc_t *)malloc(sizeof(npc_t));
+    load_npc_file(simple, "simple.js");
+
+    mobile = (npc_t *)malloc(sizeof(npc_t));
+    load_npc_file(mobile, "mobile.js");
+
+    room_t *npc_room = area_table[simple->area_id]->rooms[simple->room_id];
+    add_npc_to_room(npc_room, simple);
+    npc_table[0] = simple;
+
+    add_npc_to_room(npc_room, mobile);
+    npc_table[1] = mobile;
+}
+
 static void daemonize(void) {
     /* TODO: use pidfile? */
     int si, so, se;
@@ -260,33 +293,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    memset(area_table, 0, sizeof(area_table));
-    memset(object_table, 0, sizeof(object_table));
-
-    area_t *area;
-    area = (area_t *)malloc(sizeof(area_t));
-    load_area_file(area, "default_area.js");
-    area_table[area->id] = area;
-
-    /* proof-of-concept */
-    npc_t *simple, *mobile;
-
-    simple = (npc_t *)malloc(sizeof(npc_t));
-    load_npc_file(simple, "simple.js");
-
-    mobile = (npc_t *)malloc(sizeof(npc_t));
-    load_npc_file(mobile, "mobile.js");
-
-    room_t *npc_room = area_table[simple->area_id]->rooms[simple->room_id];
-    add_npc_to_room(npc_room, simple);
-    npc_table[0] = simple;
-
-    add_npc_to_room(npc_room, mobile);
-    npc_table[1] = mobile;
-
     /* load welcome screen */
     if (load_welcome_screen("data/welcome.txt") == -1)
         return -1;
+
+    load_areas();
+    load_npcs();
 
     /* initialize command hash table */
     cmd_init();
