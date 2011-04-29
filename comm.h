@@ -41,10 +41,10 @@
  *      - there's probably a better/cleaner way to do this...
  */
 #define CHAR_SAYS(buf, who, msg) \
-    sprintf(buf, "<br />%s says, &quot;<span class=\"blue\">%s</span>&quot;<br /><br />", who, msg);
+    sprintf(buf, "\n%s says, &quot;<span class=\"blue\">%s</span>&quot;\n\n", who, msg);
 
 #define YOU_SAY(buf, msg) \
-    sprintf(buf, "You say, &quot;<span class=\"blue\">%s</span>&quot;<br /><br />", msg);
+    sprintf(buf, "You say, &quot;<span class=\"blue\">%s</span>&quot;\n\n", msg);
 
 void send_to_char(player_t *c, const char *msg);
 void send_to_all(const char *msg);

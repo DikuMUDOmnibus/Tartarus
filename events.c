@@ -80,7 +80,7 @@ static void ev_game_tick(const int fd, const short which, void *arg) {
     evtimer_set(&game_tick, ev_game_tick, 0);
     event_base_set(main_base, &game_tick);
     evtimer_add(&game_tick, &t);
-    send_to_all("<br /><span class=\"lightblue\">You feel a calm breeze brush across your face.</span><br />");
+    send_to_all("\n<span class=\"lightblue\">You feel a calm breeze brush across your face.</span>\n");
 }
 
 static void ev_mobile_tick(const int fd, const short which, void *arg) {
@@ -130,7 +130,7 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
                 /* buffer writes until loops are complete */
                 remove_npc_from_room(from_room, npc);
                 bto += snprintf(tobuf+bto, MAXBUF,
-                                "<br />%s leaves to the %s.", npc->name, todir);
+                                "\n%s leaves to the %s.", npc->name, todir);
 
                 npc->area_id = from_room->exit_areas[dir];
                 npc->room_id = from_room->exits[dir];
@@ -140,14 +140,14 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
                 /* buffer writes until loops are complete */
                 add_npc_to_room(to_room, npc);
                 bfrom += snprintf(frombuf+bfrom, MAXBUF,
-                                  "<br />%s enters from the %s.", npc->name, fromdir);
+                                  "\n%s enters from the %s.", npc->name, fromdir);
             }
         }
     }
 
     if (moving) {
-        snprintf(tobuf+bto, MAXBUF, "<br />");
-        snprintf(frombuf+bfrom, MAXBUF, "<br />");
+        snprintf(tobuf+bto, MAXBUF, "\n");
+        snprintf(frombuf+bfrom, MAXBUF, "\n");
         send_to_room(from_room, tobuf);
         send_to_room(to_room, frombuf);
     }
@@ -456,12 +456,12 @@ static int handle_input(player_t *c) {
     case game_state_login:
         if (strlen(c->rbuf) < 32) {
             if (*c->rbuf == '\r') {
-                send_to_char(c, "<br />Enter your name: ");
+                send_to_char(c, "\nEnter your name: ");
                 break;
             }
 
             if (valid_username(c->rbuf) != 0) {
-                send_to_char(c, "<br />Letters only please.<br />Enter your name: ");
+                send_to_char(c, "\nLetters only please.\nEnter your name: ");
                 break;
             }
 
@@ -492,10 +492,10 @@ static int handle_input(player_t *c) {
             add_player_to_room(room, c);
 
             char buf[MAXBUF];
-            snprintf(buf, MAXBUF, "<br />%s has joined the game.<br />", c->username);
+            snprintf(buf, MAXBUF, "\n%s has joined the game.\n", c->username);
             send_to_all_except(c, buf);
 
-            send_to_char(c, "You joined the game.<br />");
+            send_to_char(c, "You joined the game.\n");
         } else {
             /* TODO: fix this... it's a hack for now */
             close(c->sfd);
@@ -508,7 +508,7 @@ static int handle_input(player_t *c) {
         if (strlen(c->rbuf)+2 < c->wsize) {
             return dispatch_command(c, c->rbuf);
         } else {
-            strcpy(c->wbuf, "buffer overflow detected<br />");
+            strcpy(c->wbuf, "buffer overflow detected\n");
         }
         break;
     }

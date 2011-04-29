@@ -124,7 +124,7 @@ int room_description(room_t *room, player_t *ch, char *buf) {
         return -1;
     }
 
-    n = sprintf(buf, "<br />%s<br />Exits: ", room->name);
+    n = sprintf(buf, "\n%s\nExits: ", room->name);
     for (i = 0, j = 0; i < MAX_ROOM_EXITS; ++i) {
         if (room->exits[i] > -1) {
             if (j > 0 && j < MAX_ROOM_EXITS - 1) {
@@ -145,18 +145,18 @@ int room_description(room_t *room, player_t *ch, char *buf) {
             if (empty) {
                 /* only show room items string if there are any items */
                 empty = 0;
-                n += sprintf(buf+n, "<br />Items:<br />");
+                n += sprintf(buf+n, "\nItems:\n");
             }
             object_name(roomobj, obj_name);
-            n += sprintf(buf+n, "  %s<br />", obj_name);
+            n += sprintf(buf+n, "  %s\n", obj_name);
         }
     }
 
-    n += sprintf(buf+n, "<br />");
+    n += sprintf(buf+n, "\n");
 
     npc_t *npc;
     for (npc = room->npcs; npc; npc = npc->next_in_room) {
-        n += sprintf(buf+n, "%s<br />", npc->name);
+        n += sprintf(buf+n, "%s\n", npc->name);
     }
 
     player_t *p;
@@ -166,13 +166,13 @@ int room_description(room_t *room, player_t *ch, char *buf) {
         if (p != ch) {
             if (no_chars) {
                 no_chars = 0;
-                n += sprintf(buf+n, "<br />People in this room:");
+                n += sprintf(buf+n, "\nPeople in this room:");
             }
-            n += sprintf(buf+n, "<br />  %s", p->username);
+            n += sprintf(buf+n, "\n  %s", p->username);
         }
     }
 
-    n += sprintf(buf+n, "<br />");
+    n += sprintf(buf+n, "\n");
 
     return n;
 }

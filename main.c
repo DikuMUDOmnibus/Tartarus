@@ -43,6 +43,7 @@
 #include "events.h"
 #include "area.h"
 #include "game_object.h"
+#include "commands.h"
 
 /* pointer to head of list */
 player_t *players;
@@ -213,6 +214,9 @@ int main(int argc, char **argv) {
     fclose(fp);
 
     welcome_screen[nbytes] = '\0';
+
+    /* initialize command hash table */
+    cmd_init();
 
     sfd = server_socket(AF_INET, SOCK_STREAM);
     ev_main_loop(sfd);

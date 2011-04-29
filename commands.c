@@ -33,28 +33,268 @@
 #include <string.h>
 
 #include "commands.h"
+#include "area.h"
+#include "comm.h"
 
 /* forward declarations */
-static int do_say(player_t *ch, char *arg);
+static int do_east(player_t *ch, char *arg);
 static int do_north(player_t *ch, char *arg);
+static int do_south(player_t *ch, char *arg);
+static int do_west(player_t *ch, char *arg);
+
+static int do_drop(player_t *ch, char *arg);
+static int do_inventory(player_t *ch, char *arg);
+static int do_look(player_t *ch, char *arg);
+static int do_say(player_t *ch, char *arg);
+static int do_take(player_t *ch, char *arg);
+
+static int do_quit(player_t *ch, char *arg);
+static int do_save(player_t *ch, char *arg);
 
 /* command hash table */
 static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
 
 static struct command_s commands[] = {
+    {"d", do_drop},
+    {"drop", do_drop},
+
+    {"e", do_east},
+    {"east", do_east},
+
+    {"i", do_inventory},
+    {"inventory", do_inventory},
+
+    {"l", do_look},
+    {"look", do_look},
+
     {"n", do_north},
     {"north", do_north},
-    {"say", do_say}
+
+    {"s", do_south},
+    {"south", do_south},
+
+    {"quit", do_quit},
+    {"save", do_save},
+    {"say", do_say},
+
+    {"take", do_take},
+
+    {"w", do_west},
+    {"west", do_west}
 };
 
-static int do_say(player_t *ch, char *arg) {
-    printf("say %s\n", arg);
+static int do_quit(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    snprintf(buf, MAXBUF, "\n%s quits.\n", c->username);
+    client_set_state(c, conn_closing);
+    send_to_char(c, "You quit.\n");
+    send_to_all_except(c, buf);
     return 0;
 }
 
-static int do_north(player_t *ch, char *arg) {
-    printf("go north\n");
+static int do_save(player_t *c, char *arg) {
+    int res;
+    char *filename;
+
+    filename = (char *)malloc(strlen(c->username)+1);
+    strcpy(filename, c->username);
+    strlower(filename);
+
+    res = save_player_file(c, filename);
+    send_to_char(c, "Saved.\n");
+
+    free(filename);
+    return res;
+}
+
+static int do_what(player_t *c, char *arg) {
+    /* default for input that doesn't resolve to anything */
+    send_to_char(c, "What do you want to do?\n");
     return 0;
+}
+
+static int do_say(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+
+    while (*arg == ' ')
+        ++arg;
+
+    if (!arg || *arg == '\0') {
+        send_to_char(c, "Say what?\n");
+        return -1;
+    }
+
+    CHAR_SAYS(buf, c->username, arg);
+    send_to_room_from_char(c, buf);
+    YOU_SAY(pbuf, arg);
+    send_to_char(c, pbuf);
+    return 0;
+}
+
+static int do_take(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+    room_t *room;
+    game_object_t *roomobj, *userobj;
+
+    while (*arg == ' ')
+        ++arg;
+
+    if (!arg || *arg == '\0') {
+        send_to_char(c, "What do you want to take?\n");
+        return -1;
+    }
+
+    room = area_table[c->area_id]->rooms[c->room_id];
+    roomobj = lookup_room_object(room, arg);
+
+    if (roomobj) {
+        userobj = (game_object_t *)malloc(sizeof(game_object_t));
+        memcpy(userobj, roomobj, sizeof(*roomobj));
+
+        /* set room object pointer to null and decrement num_objects */
+        room->objects[room->num_objects--] = NULL;
+        free(roomobj);
+        roomobj = NULL;
+
+        /* add userobj to inventory and increment inventory size */
+        c->inventory[c->inventory_size++] = userobj;
+
+        /* TODO: function that returns a color-coded object name string */
+        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, userobj->name);
+        send_to_room_from_char(c, buf);
+        snprintf(pbuf, MAXBUF, "You take '%s'\n", userobj->name);
+        send_to_char(c, pbuf);
+    } else {
+        send_to_char(c, "You don't see anything like that.\n");
+    }
+
+    return 0;
+}
+
+static int do_drop(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+    room_t *room;
+    game_object_t *roomobj, *userobj;
+
+    while (*arg == ' ')
+        ++arg;
+
+    if (!arg || *arg == '\0') {
+        send_to_char(c, "What do you want to drop?\n");
+        return -1;
+    }
+
+    room = area_table[c->area_id]->rooms[c->room_id];
+    userobj = lookup_inventory_object(c, arg);
+
+    if (userobj) {
+        roomobj = (game_object_t *)malloc(sizeof(game_object_t));
+        memcpy(roomobj, userobj, sizeof(*roomobj));
+
+        c->inventory[c->inventory_size--] = NULL;
+        free(userobj);
+        userobj = NULL;
+
+        room->objects[room->num_objects++] = roomobj;
+
+        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, roomobj->name);
+        send_to_room_from_char(c, buf);
+        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", roomobj->name);
+        send_to_char(c, pbuf);
+    } else {
+        send_to_char(c, "You aren't carrying that.\n");
+    }
+
+    return 0;
+}
+
+static int do_look(player_t *c, char *arg) {
+    /* TODO: arg can be NULL or whatever the player wants to look at */
+    char buf[MAXBUF];
+    room_t *room;
+
+    if (!arg || (arg && *arg == '\0')) {
+        room = area_table[c->area_id]->rooms[c->room_id];
+        room_description(room, c, buf);
+        send_to_char(c, buf);
+    }
+    return 0;
+}
+
+static int do_inventory(player_t *c, char *arg) {
+    int i, n, empty;
+    char buf[MAXBUF];
+    game_object_t *obj;
+
+    n = snprintf(buf, MAXBUF, "Inventory:\n");
+    empty = 1;
+
+    for (i = 0; i < c->inventory_size; ++i) {
+        obj = c->inventory[i];
+        if (obj) {
+            empty = 0;
+            n += snprintf(buf+n, MAXBUF, "  %s\n", obj->name);
+        }
+    }
+
+    if (empty) {
+        n += snprintf(buf+n, MAXBUF, "  Nothing here.\n");
+    }
+
+    snprintf(buf+n, MAXBUF, "\n");
+    send_to_char(c, buf);
+
+    return 0;
+}
+
+static int do_move(player_t *c, int dir) {
+    char buf[MAXBUF];
+    room_t *cur;
+
+    player_room(c, &cur);
+    if (cur->exits[dir] == -1) {
+        send_to_char(c, "You can't go that way!\n");
+        return -1;
+    }
+
+    const char *todir = exit_names[dir];
+    snprintf(buf, MAXBUF, "\n%s leaves to the %s.\n", c->username, todir);
+    send_to_room_from_char(c, buf);
+    memset(buf, 0, MAXBUF);
+
+    remove_player_from_room(cur, c);
+
+    c->area_id = cur->exit_areas[dir];
+    c->room_id = cur->exits[dir];
+
+    player_room(c, &cur);
+    add_player_to_room(cur, c);
+
+    const char *fromdir = reverse_exit_names[dir];
+    snprintf(buf, MAXBUF, "\n%s enters from the %s.\n", c->username, fromdir);
+    send_to_room_from_char(c, buf);
+
+    do_look(c, NULL);
+    return 0;
+}
+
+static int do_north(player_t *c, char *arg) {
+    return do_move(c, 0);
+}
+
+static int do_east(player_t *c, char *arg) {
+    return do_move(c, 1);
+}
+
+static int do_south(player_t *c, char *arg) {
+    return do_move(c, 2);
+}
+
+static int do_west(player_t *c, char *arg) {
+    return do_move(c, 3);
 }
 
 static long generateHashValue(const char *name) {
@@ -119,5 +359,9 @@ int dispatch_command(player_t *c, char *arg) {
     cmd[i] = '\0';
 
     func = cmd_lookup(cmd);
+
+    if (!func)
+        return do_what(c, arg);
+
     return func(c, arg);
 }
