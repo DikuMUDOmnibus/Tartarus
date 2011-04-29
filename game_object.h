@@ -48,6 +48,11 @@ enum object_rarity {
     ELITE
 };
 
+enum object_type {
+    WEAPON_TYPE = 0,
+    ARMOR_TYPE
+};
+
 typedef struct {
     char name[MAX_NAME_LEN];
     /* TODO: I don't think game objects need IDs simply because they are mapped with
@@ -58,6 +63,7 @@ typedef struct {
     char keywords[MAX_KEYWORD_LEN][MAX_KEYWORDS];
 
     enum object_rarity rarity;
+    enum object_type type;
 
     /* rooms can have static (non-removable) objects
      * and dynamic (removable) objects */

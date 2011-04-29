@@ -108,6 +108,7 @@ game_object_t *game_object_from_json(json_t *json) {
 
     obj->is_static = json_int_from_obj_key(json, "is_static");
     obj->rarity = json_int_from_obj_key(json, "rarity");
+    obj->type = json_int_from_obj_key(json, "type");
     sprintf(obj->name, "%s", json_str_from_obj_key(json, "name"));
     return obj;
 }

@@ -13,6 +13,7 @@
                     "name": "Nail Bat",
                     "is_static": 0,
                     "rarity": 2,
+                    "type": 0,
                     "keywords": ["nail", "bat", "nail bat"]
                 }
             ]
@@ -28,6 +29,7 @@
                     "name": "Leather Boots",
                     "is_static": 0,
                     "rarity": 1,
+                    "type": 1,
                     "keywords": ["leather", "boots", "leather boots"]
                 }
             ]
