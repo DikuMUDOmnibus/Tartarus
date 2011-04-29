@@ -80,7 +80,7 @@ static void ev_game_tick(const int fd, const short which, void *arg) {
     evtimer_set(&game_tick, ev_game_tick, 0);
     event_base_set(main_base, &game_tick);
     evtimer_add(&game_tick, &t);
-    send_to_all("\n<span class=\"lightblue\">You feel a calm breeze brush across your face.</span>\n");
+    send_to_all("\n&CYou feel a calm breeze brush across your face.\n");
 }
 
 static void ev_mobile_tick(const int fd, const short which, void *arg) {
