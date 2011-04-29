@@ -315,13 +315,15 @@ void ev_socket_write(const int fd, const short which, void *arg) {
     /* This function should only manage writing to a single client
      * since it's known to be ready for writing to. */
 
+    char prompt[MAXBUF];
+
+    int len, res, to_write;
+    struct sockaddr peer;
+
     player_t *c = (player_t *)arg;
     assert(c != NULL);
 
-    char prompt[MAXBUF];
-
-    int len, res;
-    int to_write = strlen(c->wbuf);
+    to_write = strlen(c->wbuf);
 
     len = 0;
     while (len < to_write) {
@@ -329,9 +331,8 @@ void ev_socket_write(const int fd, const short which, void *arg) {
     }
 
     /* Make sure client is still connected */
-    struct sockaddr peer;
     memset(&peer, 0, sizeof(struct sockaddr));
-    size_t peerlen;
+    socklen_t peerlen;
 
     res = getpeername(c->sfd, &peer, &peerlen);
     if (res == -1) {

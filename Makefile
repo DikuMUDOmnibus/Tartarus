@@ -12,13 +12,9 @@ TARGETS = jansson/libjansson.a tartarus
 all: $(TARGETS)
 
 %.o: %.c
-	$(CC) -Wall -c -g -o $@ $<
-
-jansson/%.o: jansson/%.c
-	$(CC) -Wall -c -g -o $@ $<
+	$(CC) -Wall -std=gnu99 -c -g -o $@ $<
 
 jansson/libjansson.a: $(JANSSON_OBJS)
-	$(CC) -static -s -c $<
 	ar r jansson/libjansson.a $(JANSSON_OBJS)
 
 tartarus: $(OBJECTS)

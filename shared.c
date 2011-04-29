@@ -103,11 +103,14 @@ void colorize_string(const char *str, char *writebuf) {
     /* assumes writebuf is already allocated */
 
     const char *p, *code;
-    const char *next = p;
+    const char *next;
 
     int i;
 
-    for (p = str, i = 0; *p != '\0'; ++p) {
+    p = str;
+    next = p;
+
+    for (i = 0; *p != '\0'; ++p) {
         if (*p == '&' || *p == '}') {
             next = ++p;
             if (next) {
