@@ -28,20 +28,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#include <stdlib.h>
+#include <string.h>
 
-#include "player.h"
+#include "comm.h"
+#include "events.h"
+#include "area.h"
 
-#define CMD_HASH_SIZE 1024
+void send_to_char(player_t *c, const char *msg) {
+    char *cur = c->wbuf + c->wbytes;
+    int avail = c->wsize - c->wbytes;
+    int to_write = strlen(msg);
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
+    /* TODO: resize buffer? */
+    if (to_write < avail) {
+        strncpy(cur, msg, to_write);
+        c->wbytes += to_write;
+    }
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+    update_event(c, EV_WRITE | EV_PERSIST, ev_socket_write);
+}
 
-#endif
+void send_to_all(const char *msg) {
+    player_t *p;
+    for (p = players; p; p = p->next) {
+        if (p->game_state == game_state_playing) {
+            send_to_char(p, msg);
+        }
+    }
+}
+
+void send_to_all_except(player_t *c, const char *msg) {
+    player_t *p;
+    for (p = players; p; p = p->next) {
+        if (p != c) {
+            if (p->game_state == game_state_playing) {
+                send_to_char(p, msg);
+            }
+        }
+    }
+}
+
+void send_to_room_from_char(player_t *c, const char *msg) {
+    player_t *p;
+    room_t *room;
+
+    room = area_table[c->area_id]->rooms[c->room_id];
+    for (p = room->players; p; p = p->next_in_room) {
+        if (p != c) {
+            if (p->game_state == game_state_playing)
+                send_to_char(p, msg);
+        }
+    }
+}
+
+void send_to_room(room_t *room, const char *msg) {
+    player_t *p;
+
+    for (p = room->players; p; p = p->next_in_room) {
+        if (p->game_state == game_state_playing) {
+            send_to_char(p, msg);
+        }
+    }
+}

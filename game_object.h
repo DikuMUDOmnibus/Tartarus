@@ -28,20 +28,59 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __GAME_OBJECT_H__
+#define __GAME_OBJECT_H__
 
-#include "player.h"
+#include <string.h>
 
-#define CMD_HASH_SIZE 1024
+#include "shared.h"
+#include "color.h"
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
+#define COMMON_COLOR    ANSI_GREY
+#define LIMITED_COLOR   ANSI_DGREEN
+#define RARE_COLOR      ANSI_DBLUE
+#define ELITE_COLOR     ANSI_PURPLE
+
+enum object_rarity {
+    COMMON = 0,
+    LIMITED,
+    RARE,
+    ELITE
 };
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+typedef struct {
+    char name[MAX_NAME_LEN];
+    /* TODO: I don't think game objects need IDs simply because they are mapped with
+     * pointers and don't need to be indexed/referenced by anything else */
+    int id;
+
+    int num_keywords;
+    char keywords[MAX_KEYWORD_LEN][MAX_KEYWORDS];
+
+    enum object_rarity rarity;
+
+    /* rooms can have static (non-removable) objects
+     * and dynamic (removable) objects */
+    bool is_static;
+} game_object_t;
+
+#define MAX_GAME_OBJECTS 4096
+
+/* Every object in the game is here, but there are copies of each object spread out
+ * among players, rooms, mobiles, etc */
+extern game_object_t *object_table[MAX_GAME_OBJECTS];
+
+/* load all game objects */
+int load_objects_file(const char *filename);
+
+void free_game_objects(void);
+
+/* game_object.c */
+bool object_matches_key(const game_object_t *obj, const char *key);
+void object_name(game_object_t *obj, char *writebuf);
+
+void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json);
+game_object_t *game_object_from_json(json_t *json);
+json_t *game_object_to_json(game_object_t *obj);
 
 #endif

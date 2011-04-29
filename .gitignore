@@ -1,3 +1,4 @@
 *.o
-tartarus
 *.swp
+tartarus
+jansson/libjansson.a

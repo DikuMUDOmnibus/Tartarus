@@ -28,20 +28,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __COMM_H__
+#define __COMM_H__
 
 #include "player.h"
+#include "area.h"
+#include "color.h"
 
-#define CMD_HASH_SIZE 1024
+/*
+ * MACROS: Are these legit/okay to do?
+ * - Also, ansi reset color before last quote? - hackish, but it works.
+ *      - there's probably a better/cleaner way to do this...
+ */
+#define CHAR_SAYS(buf, who, msg) \
+    sprintf(buf, "<br />%s says, &quot;<span class=\"blue\">%s</span>&quot;<br /><br />", who, msg);
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
+#define YOU_SAY(buf, msg) \
+    sprintf(buf, "You say, &quot;<span class=\"blue\">%s</span>&quot;<br /><br />", msg);
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+void send_to_char(player_t *c, const char *msg);
+void send_to_all(const char *msg);
+void send_to_all_except(player_t *c, const char *msg);
+void send_to_room_from_char(player_t *c, const char *msg);
+void send_to_room(room_t *room, const char *msg);
 
 #endif

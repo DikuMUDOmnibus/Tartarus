@@ -28,20 +28,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __SHARED_H__
+#define __SHARED_H__
 
-#include "player.h"
+#if HAVE_STDBOOL_H
+#include <stdbool.h>
+#else
+#define bool int
+#define false 0
+#define true 1
+#endif
 
-#define CMD_HASH_SIZE 1024
+#include "jansson/jansson.h"
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
+#define MAXBUF 4096
+
+#define MAX_USERNAME_LEN 32
+#define MAX_NAME_LEN 64
+
+#define MAX_KEYWORDS 16
+#define MAX_KEYWORD_LEN 32
+
+enum character_states {
+    CHAR_DEAD = 0,
+    CHAR_DYING,
+    CHAR_SLEEPING,
+    CHAR_SITTING,
+    CHAR_STANDING,
+    CHAR_FIGHTING
 };
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+int randint(int max);
+
+int setnonblock(const int fd);
+
+/* colorized string helpers */
+const char *lookup_color_code(char c, char op);
+void colorize_string(const char *str, char *writebuf);
+
+/* string helpers */
+void strlower(char *str);
+
+/* JSON helpers */
+int json_int_from_obj_key(json_t *, const char *);
+char *json_str_from_obj_key(json_t *, const char *);
 
 #endif

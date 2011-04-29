@@ -28,20 +28,73 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __PLAYER_H__
+#define __PLAYER_H__
 
-#include "player.h"
+#include <event.h>
 
-#define CMD_HASH_SIZE 1024
+#include "game_object.h"
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
+enum conn_states {
+    conn_read,
+//    conn_write,
+    conn_parse_input,
+    conn_waiting,
+    conn_closing,
+    conn_max_state
 };
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+enum game_states {
+    game_state_login,
+    game_state_playing
+};
+
+/* arbitrary limit. inventory size will ultimately be determined
+ * by weight I think */
+#define MAX_INVENTORY 32
+
+typedef struct player_s {
+    int sfd;
+    int ev_flags;
+
+    enum conn_states conn_state;
+    enum game_states game_state;
+    enum character_states ch_state;
+
+    struct event event;
+
+    char *rbuf;
+    char *rcurr;    // pointer into rbuf; start reading from this point
+    int rsize;      // total allocated memory for rbuf
+    int rbytes;     // how much data read into rbuf
+
+    char *wbuf;
+    int wsize;
+    int wbytes;
+
+    struct player_s *next;
+    struct player_s *next_in_room;
+
+    /* player data */
+    char username[MAX_USERNAME_LEN];
+    int area_id;
+    int room_id;
+
+    game_object_t *inventory[MAX_INVENTORY];
+    int inventory_size;
+} player_t;
+
+extern player_t *players;
+extern char welcome_screen[MAXBUF];
+
+/* main.c */
+void client_set_state(player_t *c, enum conn_states state);
+void client_free(player_t *c);
+
+/* player.c */
+int valid_username(const char *username);
+int load_player_file(player_t *ch, const char *filename);
+int save_player_file(player_t *ch, const char *filename);
+game_object_t *lookup_inventory_object(player_t *c, const char *key);
 
 #endif

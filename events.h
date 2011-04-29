@@ -28,20 +28,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __EVENTS_H__
+#define __EVENTS_H__
 
+#include <event.h>
+
+#include "shared.h"
 #include "player.h"
 
-#define CMD_HASH_SIZE 1024
+void ev_main_loop(const int sfd);
+void ev_socket_accept(const int fd, const short which, void *arg);
+void ev_socket_read(const int fd, const short which, void *arg);
+void ev_socket_write(const int fd, const short which, void *arg);
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
-
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+bool update_event(player_t *c, const int new_flags,
+                  void (*event_handler)(const int, const short, void *));
 
 #endif

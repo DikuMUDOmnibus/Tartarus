@@ -35,11 +35,11 @@
 #include "commands.h"
 
 /* forward declarations */
-static int do_say(struct player_s *ch, char *arg);
-static int do_north(struct player_s *ch, char *arg);
+static int do_say(player_t *ch, char *arg);
+static int do_north(player_t *ch, char *arg);
 
 /* command hash table */
-static int (*command_table[CMD_HASH_SIZE]) (struct player_s *, char *);
+static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
 
 static struct command_s commands[] = {
     {"n", do_north},
@@ -47,12 +47,12 @@ static struct command_s commands[] = {
     {"say", do_say}
 };
 
-static int do_say(struct player_s *ch, char *arg) {
+static int do_say(player_t *ch, char *arg) {
     printf("say %s\n", arg);
     return 0;
 }
 
-static int do_north(struct player_s *ch, char *arg) {
+static int do_north(player_t *ch, char *arg) {
     printf("go north\n");
     return 0;
 }
@@ -82,6 +82,42 @@ void cmd_init(void) {
         command_table[generateHashValue(commands[i].name)] = commands[i].cmd;
 }
 
-int (*cmd_lookup(const char *cmd))(struct player_s *, char *) {
+int (*cmd_lookup(const char *cmd))(player_t *, char *) {
     return command_table[generateHashValue(cmd)];
+}
+
+/* Public API into commands module */
+int dispatch_command(player_t *c, char *arg) {
+    /* accept `arg` param because sometimes you may not want to use c->rbuf and pass another buf
+     * instead */
+
+    /* TODO: Bounds checking! */
+
+    char *p;
+    char cmd[32];
+    int i;
+    int (*func)(player_t *, char *);
+
+    if (!arg)
+        return 0;
+
+    while (*arg == ' ')
+        ++arg;
+
+    /* start of command */
+    p = arg;
+
+    while (*arg != '\0' && *arg != ' ') {
+        /* find next space or end of string to determine
+         * the command */
+        ++arg;
+    }
+
+    i = (arg-p);
+
+    strncpy(cmd, p, i);
+    cmd[i] = '\0';
+
+    func = cmd_lookup(cmd);
+    return func(c, arg);
 }

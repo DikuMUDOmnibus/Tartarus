@@ -28,20 +28,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __AREA_H__
+#define __AREA_H__
 
+#include "game_object.h"
 #include "player.h"
+#include "npc.h"
 
-#define CMD_HASH_SIZE 1024
+#define MAX_ROOM_EXITS 4
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
+typedef struct room_s {
+    char name[64];
+    int id;
+    int area_id;        /* area this room belongs to */
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+    /* room exit indexes: -1 indicates no exit */ 
+    /* n = 0, e = 1, s = 2, w = 3 */
+    int exits[MAX_ROOM_EXITS];
+
+    /* area indexes for these exits */
+    int exit_areas[MAX_ROOM_EXITS];
+
+    /* generally a room won't have thousands of objects */
+    int num_objects;
+    game_object_t *objects[MAX_GAME_OBJECTS];
+
+    /* players in this room */
+    player_t *players;
+    npc_t *npcs;
+} room_t;
+
+typedef struct area_s {
+    int id;
+    int num_rooms;
+    char name[64];
+    room_t **rooms;
+} area_t;
+
+/* TODO: dynamically allocate based on area metadata */
+#define MAX_AREAS 16
+
+extern area_t *area_table[MAX_AREAS];
+extern const char *exit_names[];
+extern const char *reverse_exit_names[];
+
+int load_area_file(area_t *area, const char *filename);
+int room_description(room_t *room, player_t *ch, char *buf);
+
+game_object_t *lookup_room_object(room_t *room, const char *key);
+void add_player_to_room(room_t *room, player_t *ch);
+void remove_player_from_room(room_t *room, player_t *ch);
+void add_npc_to_room(room_t *room, npc_t *npc);
+void remove_npc_from_room(room_t *room, npc_t *npc);
+
+void player_room(player_t *ch, room_t **r);
+void npc_room(npc_t *npc, room_t **r);
+
+void area_free(area_t *area);
+void free_all_areas(void);
 
 #endif

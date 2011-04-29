@@ -28,20 +28,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef __NPC_H__
+#define __NPC_H__
 
-#include "player.h"
+#include "shared.h"
+#include "game_object.h"
 
-#define CMD_HASH_SIZE 1024
+#define MAX_NPC_INVENTORY 32
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
+typedef struct npc_s {
+    char name[MAX_NAME_LEN];
+    int area_id;
+    int room_id;
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+    enum character_states ch_state;
+
+    int num_keywords;
+    char keywords[MAX_KEYWORD_LEN][MAX_KEYWORDS];
+
+    int inventory_size;
+    game_object_t *inventory[MAX_NPC_INVENTORY];
+
+    /* can this NPC move around to different rooms? */
+    bool is_mobile;
+
+    struct npc_s *next_in_room;
+} npc_t;
+
+#define MAX_NPCS 1024
+
+extern npc_t *npc_table[MAX_NPCS];
+
+/* loads a single npc from file */
+int load_npc_file(npc_t *npc, const char *filename);
+
+/* loads all npcs from file and places them in the proper locations (rooms).
+ * also fills the npc_table */
+int load_all_npcs(const char *filename);
+
+void npc_free(npc_t *npc);
+void free_all_npcs(void);
 
 #endif

@@ -28,20 +28,65 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#include <stdlib.h>
 
-#include "player.h"
+#include "npc.h"
+#include "game_object.h"
 
-#define CMD_HASH_SIZE 1024
+#define NPC_DATA_DIR "data/npcs"
 
-struct command_s {
-    char *name;
-    int (*cmd)(player_t *, char *);
-};
+void npc_free(npc_t *npc) {
+    int i;
+    game_object_t *obj;
 
-void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
-int dispatch_command(player_t *c, char *arg);
+    if (npc) {
+        for (i = 0; i < npc->inventory_size; ++i) {
+            obj = npc->inventory[i];
+            if (obj)
+                free(obj);
+        }
 
-#endif
+        free(npc);
+    }
+}
+
+void free_all_npcs(void) {
+    int i;
+    for (i = 0; i < MAX_NPCS; ++i) {
+        npc_free(npc_table[i]);
+    }
+}
+
+int load_npc_file(npc_t *npc, const char *filename) {
+    char path[256];
+    int inv_size, i;
+    game_object_t *inv_obj;
+    json_t *jsp, *inv;
+    json_error_t jserror;
+
+    sprintf(path, "%s/%s", NPC_DATA_DIR, filename);
+    jsp = json_load_file(path, 0, &jserror);
+    if (!jsp)
+        return -1;
+
+    sprintf(npc->name, "%s", json_str_from_obj_key(jsp, "name"));
+    npc->area_id = json_int_from_obj_key(jsp, "area_id");
+    npc->room_id = json_int_from_obj_key(jsp, "room_id");
+    npc->ch_state = json_int_from_obj_key(jsp, "ch_state");
+    keywords_from_json(npc->keywords, jsp);
+
+    memset(npc->inventory, 0, sizeof(npc->inventory));
+
+    inv = json_object_get(jsp, "inventory");
+    inv_size = json_array_size(inv);
+    npc->inventory_size = inv_size;
+
+    for (i = 0; i < inv_size; ++i) {
+        json_t *js_inventory = json_array_get(inv, i);
+        inv_obj = game_object_from_json(js_inventory);
+        npc->inventory[i] = inv_obj;
+    }
+
+    json_decref(jsp);
+    return 0;
+}
