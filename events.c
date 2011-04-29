@@ -494,7 +494,7 @@ static int handle_input(player_t *c) {
             snprintf(buf, MAXBUF, "\n%s has entered Tartarus.\n", c->username);
             send_to_all_except(c, buf);
 
-            send_to_char(c, "You've arrived in Tartarus.\n\n");
+            send_to_char(c, "&RYou've arrived in Tartarus.\n\n");
         } else {
             /* TODO: fix this... it's a hack for now */
             close(c->sfd);
