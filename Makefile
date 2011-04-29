@@ -16,6 +16,7 @@ all: $(TARGETS)
 
 jansson/libjansson.a: $(JANSSON_OBJS)
 	ar r jansson/libjansson.a $(JANSSON_OBJS)
+	ranlib jansson/libjansson.a
 
 tartarus: $(OBJECTS)
 	$(CC) -o tartarus $(OBJECTS) jansson/libjansson.a -levent
