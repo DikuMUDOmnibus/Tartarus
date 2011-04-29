@@ -58,6 +58,7 @@ enum character_states {
     CHAR_FIGHTING
 };
 
+void randseed(void);
 int randint(int max);
 
 int setnonblock(const int fd);

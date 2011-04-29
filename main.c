@@ -61,6 +61,7 @@ npc_t *npc_table[MAX_NPCS];
 
 char welcome_screen[MAXBUF];
 
+static void daemonize(void);
 static int server_socket(int s_family, int s_type);
 static int load_welcome_screen(const char *filename);
 static void load_areas(void);
@@ -308,6 +309,7 @@ int main(int argc, char **argv) {
     if (daemonize_process)
         daemonize();
 
+    randseed();
     ev_main_loop(sfd, port);
 
     free_all_areas();

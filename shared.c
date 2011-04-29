@@ -39,7 +39,7 @@
 #include "shared.h"
 #include "color.h"
 
-int randint(int max) {
+void randseed(void) {
     struct timeval t;
     float ms;
 
@@ -47,6 +47,9 @@ int randint(int max) {
     ms = t.tv_sec*1000 + t.tv_usec*0.001;
 
     srand(ms);
+}
+
+int randint(int max) {
     return rand() % max;
 }
 

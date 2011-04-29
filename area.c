@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "area.h"
 #include "npc.h"
@@ -46,7 +47,7 @@ const char *reverse_exit_names[] = {"south", "west", "north", "east"};
 int load_area_file(area_t *area, const char *filename) {
     /* assumes area is malloc'd already */
 
-    char path[256];
+    char path[PATH_MAX];
     unsigned int num_rooms;
     int i, j;
     room_t *room;
@@ -56,9 +57,9 @@ int load_area_file(area_t *area, const char *filename) {
 
     sprintf(path, "%s/%s", AREA_DATA_DIR, filename);
     jsp = json_load_file(path, 0, &jserror);
-    if (!jsp) {
+
+    if (!jsp)
         return -1;
-    }
 
     area->id = json_int_from_obj_key(jsp, "id");
     sprintf(area->name, "%s", json_str_from_obj_key(jsp, "name"));

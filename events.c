@@ -474,7 +474,7 @@ static int handle_input(player_t *c) {
                 c->area_id = c->room_id = 0;
                 c->ch_state = CHAR_STANDING;
 
-                if (save_player_file(c, c->username) == -1) {
+                if (save_player_file(c) == -1) {
                     close(c->sfd);
                     client_free(c);
                     break;

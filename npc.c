@@ -29,6 +29,7 @@
  */
 
 #include <stdlib.h>
+#include <limits.h>
 
 #include "npc.h"
 #include "game_object.h"
@@ -58,7 +59,7 @@ void free_all_npcs(void) {
 }
 
 int load_npc_file(npc_t *npc, const char *filename) {
-    char path[256];
+    char path[PATH_MAX];
     int inv_size, i;
     game_object_t *inv_obj;
     json_t *jsp, *inv;
@@ -73,6 +74,7 @@ int load_npc_file(npc_t *npc, const char *filename) {
     npc->area_id = json_int_from_obj_key(jsp, "area_id");
     npc->room_id = json_int_from_obj_key(jsp, "room_id");
     npc->ch_state = json_int_from_obj_key(jsp, "ch_state");
+    npc->is_mobile = json_int_from_obj_key(jsp, "is_mobile");
     keywords_from_json(npc->keywords, jsp);
 
     memset(npc->inventory, 0, sizeof(npc->inventory));
