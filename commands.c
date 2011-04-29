@@ -29,17 +29,59 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "commands.h"
 
-int main(int argc, char **argv) {
-    int (*cmd)(struct player_s *, char *);
+/* forward declarations */
+static int do_say(struct player_s *ch, char *arg);
+static int do_north(struct player_s *ch, char *arg);
 
-    cmd_init();
+/* command hash table */
+static int (*command_table[CMD_HASH_SIZE]) (struct player_s *, char *);
 
-    cmd = cmd_lookup("north");
-    cmd(NULL, "david");
-    cmd = cmd_lookup("say");
-    cmd(NULL, "david");
+static struct command_s commands[] = {
+    {"n", do_north},
+    {"north", do_north},
+    {"say", do_say}
+};
+
+static int do_say(struct player_s *ch, char *arg) {
+    printf("say %s\n", arg);
     return 0;
+}
+
+static int do_north(struct player_s *ch, char *arg) {
+    printf("go north\n");
+    return 0;
+}
+
+static long generateHashValue(const char *name) {
+    int i;
+    char c;
+    long hash;
+
+    hash = 0;
+    i = 0;
+    for (i = 0; i < strlen(name); ++i) {
+        c = tolower(name[i]);
+        hash = (hash << 4) ^ (hash >> 28) ^ c;
+    }
+
+    /* clamp the hash to CMD_HASH_SIZE-1 */
+    hash &= CMD_HASH_SIZE-1;
+    return hash;
+}
+
+void cmd_init(void) {
+    int i, len;
+    len = sizeof(commands) / sizeof(struct command_s);
+
+    for (i = 0; i < len; ++i)
+        command_table[generateHashValue(commands[i].name)] = commands[i].cmd;
+}
+
+int (*cmd_lookup(const char *cmd))(struct player_s *, char *) {
+    return command_table[generateHashValue(cmd)];
 }

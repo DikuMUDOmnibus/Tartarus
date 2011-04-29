@@ -1,6 +1,6 @@
 CC = gcc
 
-OBJECTS = main.o
+OBJECTS = main.o commands.o
 
 all: tartarus
 

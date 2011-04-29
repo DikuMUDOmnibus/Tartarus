@@ -28,18 +28,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
+#ifndef _COMMANDS_H_
+#define _COMMANDS_H_
 
-#include "commands.h"
+#define CMD_HASH_SIZE 1024
 
-int main(int argc, char **argv) {
+/* TEMP */
+struct player_s {
+    char name[32];
+};
+
+struct command_s {
+    char *name;
     int (*cmd)(struct player_s *, char *);
+};
 
-    cmd_init();
+void cmd_init(void);
+int (*cmd_lookup(const char *cmd))(struct player_s *, char *);
 
-    cmd = cmd_lookup("north");
-    cmd(NULL, "david");
-    cmd = cmd_lookup("say");
-    cmd(NULL, "david");
-    return 0;
-}
+#endif
