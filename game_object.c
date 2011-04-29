@@ -33,6 +33,9 @@
 #include "game_object.h"
 
 bool object_matches_key(const game_object_t *obj, const char *key) {
+    /* TODO: I don't like this. I'd prefer doing a hash table like the commands
+     * hash table. */
+
     /* do a lookup over all object->keywords to find a match with key.
      * - true if match, false otherwise. */
     int i;
@@ -84,14 +87,14 @@ void object_name(game_object_t *obj, char *writebuf) {
 }
 
 void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json) {
-    json_t *keywords;
+    json_t *keywords, *key;
     int numkeys, i;
 
     keywords = json_object_get(json, "keywords");
     numkeys = json_array_size(keywords);
 
     for (i = 0; i < numkeys; ++i) {
-        json_t *key = json_array_get(keywords, i);
+        key = json_array_get(keywords, i);
         sprintf(out[i], "%s", json_string_value(key));
     }
 }
