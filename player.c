@@ -152,7 +152,6 @@ int save_player_file(player_t *ch, const char *filename) {
     json_object_set(jsp, "inventory", arr);
     json_decref(arr);
 
-    /* For some reason the file isn't being written to */
     sprintf(path, "%s/%s.js", PLAYER_DATA_DIR, filename);
     retval = json_dump_file(jsp, path, JSON_INDENT(4));
 
