@@ -58,6 +58,8 @@ static int do_remove(player_t *ch, char *arg);
 static int do_quit(player_t *ch, char *arg);
 static int do_save(player_t *ch, char *arg);
 
+static int (*cmd_lookup(const char *cmd))(player_t *, char *);
+
 /* command hash table */
 static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
 
@@ -421,16 +423,16 @@ static long generateHashValue(const char *name) {
     return hash;
 }
 
+static int (*cmd_lookup(const char *cmd))(player_t *, char *) {
+    return command_table[generateHashValue(cmd)];
+}
+
 void cmd_init(void) {
     int i, len;
     len = sizeof(commands) / sizeof(struct command_s);
 
     for (i = 0; i < len; ++i)
         command_table[generateHashValue(commands[i].name)] = commands[i].cmd;
-}
-
-int (*cmd_lookup(const char *cmd))(player_t *, char *) {
-    return command_table[generateHashValue(cmd)];
 }
 
 /* Public API into commands module */

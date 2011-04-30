@@ -41,7 +41,6 @@ struct command_s {
 };
 
 void cmd_init(void);
-int (*cmd_lookup(const char *cmd))(player_t *, char *);
 int dispatch_command(player_t *c, char *arg);
 
 #endif
