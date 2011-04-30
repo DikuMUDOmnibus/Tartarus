@@ -231,6 +231,7 @@ static int do_wear(player_t *c, char *arg) {
         invobj->next = c->equipment;
         c->equipment = invobj;
         c->wearing |= invobj->wear_location;
+        c->armor += invobj->armor;
 
         send_object_interaction(c, invobj, "\n%s equipped '%s'\n", "You equipped '%s'\n");
     } else if (invobj && invobj->type != ARMOR_TYPE) {
@@ -265,6 +266,7 @@ static int do_remove(player_t *c, char *arg) {
         obj->next = c->inventory;
         c->inventory = obj;
         c->wearing &= ~obj->wear_location;
+        c->armor -= obj->armor;
 
         send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
     } else {
