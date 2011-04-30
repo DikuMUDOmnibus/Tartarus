@@ -39,6 +39,7 @@
 
 /* forward declarations */
 static int has_arg(char **arg);
+static int do_what(player_t *ch, char *arg);
 
 static int do_east(player_t *ch, char *arg);
 static int do_north(player_t *ch, char *arg);
