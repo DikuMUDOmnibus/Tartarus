@@ -124,11 +124,13 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
                 moving = 1;
                 const char *todir = exit_names[dir];
                 const char *fromdir = reverse_exit_names[dir];
+                memset(tobuf, 0, MAXBUF);
+                memset(frombuf, 0, MAXBUF);
 
                 /* buffer writes until loops are complete */
                 remove_npc_from_room(from_room, npc);
-                bto += snprintf(tobuf+bto, MAXBUF,
-                                "\n%s leaves to the %s.", npc->name, todir);
+                bto = snprintf(tobuf, MAXBUF,
+                               "\n%s leaves to the %s.\n", npc->name, todir);
 
                 npc->area_id = from_room->exit_areas[dir];
                 npc->room_id = from_room->exits[dir];
@@ -137,17 +139,12 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
 
                 /* buffer writes until loops are complete */
                 add_npc_to_room(to_room, npc);
-                bfrom += snprintf(frombuf+bfrom, MAXBUF,
-                                  "\n%s enters from the %s.", npc->name, fromdir);
+                bfrom = snprintf(frombuf, MAXBUF,
+                                 "\n%s enters from the %s.\n", npc->name, fromdir);
+                send_to_room(from_room, tobuf);
+                send_to_room(to_room, frombuf);
             }
         }
-    }
-
-    if (moving) {
-        snprintf(tobuf+bto, MAXBUF, "\n");
-        snprintf(frombuf+bfrom, MAXBUF, "\n");
-        send_to_room(from_room, tobuf);
-        send_to_room(to_room, frombuf);
     }
 }
 
