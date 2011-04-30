@@ -318,7 +318,6 @@ static long generateHashValue(const char *name) {
     long hash;
 
     hash = 0;
-    i = 0;
     for (i = 0; i < strlen(name); ++i) {
         c = tolower(name[i]);
         hash = (hash << 4) ^ (hash >> 28) ^ c;
