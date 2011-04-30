@@ -47,6 +47,7 @@ static int do_south(player_t *ch, char *arg);
 static int do_west(player_t *ch, char *arg);
 
 static int do_drop(player_t *ch, char *arg);
+static int do_equipment(player_t *ch, char *arg);
 static int do_inventory(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
@@ -63,6 +64,9 @@ static int (*command_table[CMD_HASH_SIZE]) (player_t *, char *);
 static struct command_s commands[] = {
     {"d", do_drop},
     {"drop", do_drop},
+
+    {"eq", do_equipment},
+    {"equipment", do_equipment},
 
     {"e", do_east},
     {"east", do_east},
@@ -295,30 +299,66 @@ static int do_look(player_t *c, char *arg) {
 }
 
 static int do_inventory(player_t *c, char *arg) {
-    int n, empty;
+    /*
+     * TODO: verify that bytes < MAXBUF. if bytes >= MAXBUF,
+     *       the "best" practice is to malloc more space and use
+     *       n to determine how many more bytes are needed.
+     */
+    int n, bytes, empty;
     char buf[MAXBUF], obj_name[MAX_NAME_LEN * 2];
     game_object_t *obj;
 
     n = snprintf(buf, MAXBUF, "Inventory:\n");
+    bytes = n;
     empty = 1;
 
     for (obj = c->inventory; obj; obj = obj->next) {
         empty = 0;
         colorize_object_name(obj, obj_name);
-        n += snprintf(buf+n, MAXBUF, "  %s\n", obj_name);
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", obj_name);
+        bytes += n;
     }
 
     if (empty) {
-        n += snprintf(buf+n, MAXBUF, "  Nothing here.\n");
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  You aren't carrying anything.\n");
+        bytes += n;
     }
 
-    snprintf(buf+n, MAXBUF, "\n");
+    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
+    send_to_char(c, buf);
+
+    return 0;
+}
+
+static int do_equipment(player_t *c, char *arg) {
+    int n, bytes, empty;
+    char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
+    game_object_t *obj;
+
+    n = snprintf(buf, MAXBUF, "Equipment:\n");
+    bytes = n;
+    empty = 1;
+
+    for (obj = c->equipment; obj; obj = obj->next) {
+        empty = 0;
+        colorize_object_name(obj, objname);
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", objname);
+        bytes += n;
+    }
+
+    if (empty) {
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  You aren't wearing anything.\n");
+        bytes += n;
+    }
+
+    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
     send_to_char(c, buf);
 
     return 0;
 }
 
 static int do_move(player_t *c, int dir) {
+    /* called by do_{nesw} */
     char buf[MAXBUF];
     room_t *cur;
 
