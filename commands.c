@@ -38,6 +38,8 @@
 #include "comm.h"
 
 /* forward declarations */
+static int has_arg(char **arg);
+
 static int do_east(player_t *ch, char *arg);
 static int do_north(player_t *ch, char *arg);
 static int do_south(player_t *ch, char *arg);
@@ -91,6 +93,20 @@ static struct command_s commands[] = {
     {"west", do_west}
 };
 
+static int has_arg(char **arg) {
+    /*
+     * check if arg has anymore chars in it for processing
+     * since some commands require an arg after the command.
+     * returns 0 if no arg, 1 if arg. **arg is required to modify
+     * its pointer and return the updated string to caller.
+     */
+    char *p = *arg;
+    while (*p == ' ')
+        ++p;
+    *arg = p;
+    return (p && *p != '\0');
+}
+
 static int do_quit(player_t *c, char *arg) {
     char buf[MAXBUF];
 
@@ -121,10 +137,7 @@ static int do_say(player_t *c, char *arg) {
     char buf[MAXBUF];
     char pbuf[MAXBUF];
 
-    while (*arg == ' ')
-        ++arg;
-
-    if (!arg || *arg == '\0') {
+    if (!has_arg(&arg)) {
         send_to_char(c, "Say what?\n");
         return -1;
     }
@@ -140,10 +153,7 @@ static int do_take(player_t *c, char *arg) {
     room_t *room;
     game_object_t *roomobj;
 
-    while (*arg == ' ')
-        ++arg;
-
-    if (!arg || *arg == '\0') {
+    if (!has_arg(&arg)) {
         send_to_char(c, "What do you want to take?\n");
         return -1;
     }
@@ -174,10 +184,7 @@ static int do_drop(player_t *c, char *arg) {
     room_t *room;
     game_object_t *userobj;
 
-    while (*arg == ' ')
-        ++arg;
-
-    if (!arg || *arg == '\0') {
+    if (!has_arg(&arg)) {
         send_to_char(c, "What do you want to drop?\n");
         return -1;
     }
@@ -205,10 +212,7 @@ static int do_drop(player_t *c, char *arg) {
 static int do_wear(player_t *c, char *arg) {
     game_object_t *invobj, *cur, *prev;
 
-    while (*arg == ' ')
-        ++arg;
-
-    if (!arg || *arg == '\0') {
+    if (!has_arg(&arg)) {
         send_to_char(c, "What do you want to wear?\n");
         return -1;
     }
@@ -246,10 +250,7 @@ static int do_wear(player_t *c, char *arg) {
 static int do_remove(player_t *c, char *arg) {
     game_object_t *obj, *cur, *prev;
 
-    while (*arg == ' ')
-        ++arg;
-
-    if (!arg || *arg == '\0') {
+    if (!has_arg(&arg)) {
         send_to_char(c, "What do you want to remove?\n");
         return -1;
     }
@@ -286,6 +287,7 @@ static int do_look(player_t *c, char *arg) {
         room_description(room, c, buf);
         send_to_char(c, buf);
     } else {
+        /* TODO: parse arg for something to look at */
         send_to_char(c, "What are you looking at?\n");
     }
     return 0;
