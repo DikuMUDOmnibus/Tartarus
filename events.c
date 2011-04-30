@@ -473,6 +473,7 @@ static int handle_input(player_t *c) {
                 c->username[strlen(c->rbuf)] = '\0';
                 c->area_id = c->room_id = 0;
                 c->ch_state = CHAR_STANDING;
+                c->inventory = NULL;
 
                 if (save_player_file(c) == -1) {
                     close(c->sfd);

@@ -94,9 +94,8 @@ int load_area_file(area_t *area, const char *filename) {
 
         obj = json_object_get(room_array_obj, "objects");
         int numobjs = json_array_size(obj);
-        room->num_objects = numobjs;
 
-        memset(room->objects, 0, sizeof(room->objects));
+        room->objects = NULL;
 
         json_t *js_gameobj;
         game_object_t *gameobj;
@@ -104,7 +103,8 @@ int load_area_file(area_t *area, const char *filename) {
         for (j = 0; j < numobjs; ++j) {
             js_gameobj = json_array_get(obj, j);
             gameobj = game_object_from_json(js_gameobj);
-            room->objects[j] = gameobj;
+            gameobj->next = room->objects;
+            room->objects = gameobj;
         }
 
         area->rooms[room->id] = room;
@@ -140,17 +140,14 @@ int room_description(room_t *room, player_t *ch, char *buf) {
     /* this is only here to provide enough space for color escape codes */
     char obj_name[MAX_NAME_LEN * 2];
 
-    for (i = 0; i < room->num_objects; ++i) {
-        roomobj = room->objects[i];
-        if (roomobj) {
-            if (empty) {
-                /* only show room items string if there are any items */
-                empty = 0;
-                n += sprintf(buf+n, "\nItems:\n");
-            }
-            object_name(roomobj, obj_name);
-            n += sprintf(buf+n, "  %s\n", obj_name);
+    for (roomobj = room->objects; roomobj; roomobj = roomobj->next) {
+        if (empty) {
+            /* only show room items string if there are any items */
+            empty = 0;
+            n += sprintf(buf+n, "\nItems:\n");
         }
+        object_name(roomobj, obj_name);
+        n += sprintf(buf+n, "  %s\n", obj_name);
     }
 
     n += sprintf(buf+n, "\n");
@@ -179,13 +176,11 @@ int room_description(room_t *room, player_t *ch, char *buf) {
 }
 
 game_object_t *lookup_room_object(room_t *room, const char *key) {
-    int i;
     game_object_t *obj, *tmp;
 
-    obj = tmp = NULL;
+    obj = NULL;
 
-    for (i = 0; i < room->num_objects; ++i) {
-        tmp = room->objects[i];
+    for (tmp = room->objects; tmp; tmp = tmp->next) {
         if (object_matches_key(tmp, key)) {
             obj = tmp;
             break;

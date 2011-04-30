@@ -80,11 +80,9 @@ typedef struct player_s {
     int area_id;
     int room_id;
 
-    game_object_t *inventory[MAX_INVENTORY];
-//    game_object_t *equipped_armor[MAX_INVENTORY];
+    game_object_t *inventory; /* pointer to head of inventory */
+    game_object_t *equipped;
 
-    int inventory_size;
-    int num_equipped;
     int armor;
 } player_t;
 

@@ -86,7 +86,7 @@ int load_player_file(player_t *ch, const char *filename) {
     char path[PATH_MAX];
     int inv_size, i;
     game_object_t *inv_obj;
-    json_t *jsp, *inv;
+    json_t *jsp, *inv, *js_inventory;
     json_error_t jserror;
 
     sprintf(path, "%s/%s.js", PLAYER_DATA_DIR, filename);
@@ -99,19 +99,18 @@ int load_player_file(player_t *ch, const char *filename) {
     ch->area_id = json_int_from_obj_key(jsp, "area_id");
     ch->room_id = json_int_from_obj_key(jsp, "room_id");
     ch->ch_state = json_int_from_obj_key(jsp, "ch_state");
+    ch->armor = json_int_from_obj_key(jsp, "armor");
 
-    memset(ch->inventory, 0, sizeof(ch->inventory));
+    ch->inventory = NULL;
 
     inv = json_object_get(jsp, "inventory");
     inv_size = json_array_size(inv);
-    ch->inventory_size = inv_size;
-
-    ch->armor = json_int_from_obj_key(jsp, "armor");
 
     for (i = 0; i < inv_size; ++i) {
-        json_t *js_inventory = json_array_get(inv, i);
+        js_inventory = json_array_get(inv, i);
         inv_obj = game_object_from_json(js_inventory);
-        ch->inventory[i] = inv_obj;
+        inv_obj->next = ch->inventory;
+        ch->inventory = inv_obj;
     }
 
     json_decref(jsp);
@@ -123,7 +122,6 @@ static char *player_json(player_t *ch) {
      * so it can be saved at a later time.
      * - http://www.digip.org/jansson/doc/1.0/apiref.html */
 
-    int i;
     char *res;
     json_t *jsp, *val, *arr, *jsobj;
     game_object_t *obj;
@@ -153,8 +151,7 @@ static char *player_json(player_t *ch) {
     json_decref(val);
 
     arr = json_array();
-    for (i = 0; i < ch->inventory_size; ++i) {
-        obj = ch->inventory[i];
+    for (obj = ch->inventory; obj; obj = obj->next) {
         jsobj = game_object_to_json(obj);
         json_array_append(arr, jsobj);
         json_decref(jsobj);
@@ -206,13 +203,11 @@ int save_player_file(player_t *c) {
 }
 
 game_object_t *lookup_inventory_object(player_t *c, const char *key) {
-    int i;
     game_object_t *obj, *tmp;
 
-    obj = tmp = NULL;
+    obj = NULL;
 
-    for (i = 0; i < c->inventory_size; ++i) {
-        tmp = c->inventory[i];
+    for (tmp = c->inventory; tmp; tmp = tmp->next) {
         if (object_matches_key(tmp, key)) {
             obj = tmp;
             break;

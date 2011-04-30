@@ -50,8 +50,7 @@ typedef struct room_s {
     int exit_areas[MAX_ROOM_EXITS];
 
     /* generally a room won't have thousands of objects */
-    int num_objects;
-    game_object_t *objects[MAX_GAME_OBJECTS];
+    game_object_t *objects;
 
     /* players in this room */
     player_t *players;

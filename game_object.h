@@ -66,7 +66,7 @@ enum WEAR_LOCATION {
     FEET
 };
 
-typedef struct {
+typedef struct game_object_s {
     char name[MAX_NAME_LEN];
     /* TODO: I don't think game objects need IDs simply because they are mapped with
      * pointers and don't need to be indexed/referenced by anything else */
@@ -85,6 +85,7 @@ typedef struct {
 
     /* how much armor this object provides */
     int armor;
+    struct game_object_s *next;
 } game_object_t;
 
 #define MAX_GAME_OBJECTS 4096

@@ -68,10 +68,14 @@ static void load_areas(void);
 static void load_npcs(void);
 
 void room_free(room_t *room) {
-    int i;
+    game_object_t *obj, *next;
+
     if (room) {
-        for (i = 0; i < room->num_objects; ++i) {
-            free(room->objects[i]);
+        obj = room->objects;
+        while (obj) {
+            next = obj->next;
+            free(obj);
+            obj = next;
         }
         free(room);
     }
@@ -98,13 +102,12 @@ void free_all_areas(void) {
 }
 
 void inventory_free(player_t *c) {
-    int i;
-    game_object_t *obj;
-    for (i = 0; i < c->inventory_size; ++i) {
-        obj = c->inventory[i];
-        if (obj) {
-            free(obj);
-        }
+    game_object_t *obj, *next;
+    obj = c->inventory;
+    while (obj) {
+        next = obj->next;
+        free(obj);
+        obj = next;
     }
 }
 
@@ -136,7 +139,6 @@ void client_free(player_t *c) {
             free(c->wbuf);
 
         remove_player_from_room(room, c);
-        inventory_free(c);
         free(c);
     }
 }

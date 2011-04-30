@@ -136,7 +136,7 @@ static int do_take(player_t *c, char *arg) {
     char buf[MAXBUF];
     char pbuf[MAXBUF];
     room_t *room;
-    game_object_t *roomobj, *userobj;
+    game_object_t *roomobj;
 
     while (*arg == ' ')
         ++arg;
@@ -149,23 +149,26 @@ static int do_take(player_t *c, char *arg) {
     room = area_table[c->area_id]->rooms[c->room_id];
     roomobj = lookup_room_object(room, arg);
 
+    game_object_t *cur, *prev = NULL;
+
     if (roomobj && !roomobj->is_static) {
-        userobj = (game_object_t *)malloc(sizeof(game_object_t));
-        memcpy(userobj, roomobj, sizeof(*roomobj));
+        for (cur = room->objects; cur; prev = cur, cur = cur->next) {
+            if (cur == roomobj) {
+                if (!prev)
+                    room->objects = cur->next;
+                else
+                    prev->next = cur->next;
+                break;
+            }
+        }
 
-        /* set room object pointer to null and decrement num_objects */
-        room->objects[room->num_objects--] = NULL;
-        free(roomobj);
-        roomobj = NULL;
-
-        /* add userobj to inventory and increment inventory size */
-        /* XXX: don't free userobj because it's not referenced by c->inventory */
-        c->inventory[c->inventory_size++] = userobj;
+        roomobj->next = c->inventory;
+        c->inventory = roomobj;
 
         /* TODO: function that returns a color-coded object name string */
-        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, userobj->name);
+        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, roomobj->name);
         send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You take '%s'\n", userobj->name);
+        snprintf(pbuf, MAXBUF, "You take '%s'\n", roomobj->name);
         send_to_char(c, pbuf);
     } else if (roomobj && roomobj->is_static) {
         send_to_char(c, "You can't take that.\n");
@@ -180,7 +183,7 @@ static int do_drop(player_t *c, char *arg) {
     char buf[MAXBUF];
     char pbuf[MAXBUF];
     room_t *room;
-    game_object_t *roomobj, *userobj;
+    game_object_t *userobj;
 
     while (*arg == ' ')
         ++arg;
@@ -193,20 +196,25 @@ static int do_drop(player_t *c, char *arg) {
     room = area_table[c->area_id]->rooms[c->room_id];
     userobj = lookup_inventory_object(c, arg);
 
+    game_object_t *cur, *prev = NULL;
+
     if (userobj) {
-        roomobj = (game_object_t *)malloc(sizeof(game_object_t));
-        memcpy(roomobj, userobj, sizeof(*roomobj));
+        for (cur = c->inventory; cur; prev = cur, cur = cur->next) {
+            if (cur == userobj) {
+                if (!prev)
+                    c->inventory = cur->next;
+                else
+                    prev->next = cur->next;
+                break;
+            }
+        }
 
-        c->inventory[c->inventory_size--] = NULL;
-        free(userobj);
-        userobj = NULL;
+        userobj->next = room->objects;
+        room->objects = userobj;
 
-        /* XXX: don't free roomobj because it's referenced by room->objects */
-        room->objects[room->num_objects++] = roomobj;
-
-        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, roomobj->name);
+        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, userobj->name);
         send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", roomobj->name);
+        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", userobj->name);
         send_to_char(c, pbuf);
     } else {
         send_to_char(c, "You aren't carrying that.\n");
@@ -231,19 +239,16 @@ static int do_look(player_t *c, char *arg) {
 }
 
 static int do_inventory(player_t *c, char *arg) {
-    int i, n, empty;
+    int n, empty;
     char buf[MAXBUF];
     game_object_t *obj;
 
     n = snprintf(buf, MAXBUF, "Inventory:\n");
     empty = 1;
 
-    for (i = 0; i < c->inventory_size; ++i) {
-        obj = c->inventory[i];
-        if (obj) {
-            empty = 0;
-            n += snprintf(buf+n, MAXBUF, "  %s\n", obj->name);
-        }
+    for (obj = c->inventory; obj; obj = obj->next) {
+        empty = 0;
+        n += snprintf(buf+n, MAXBUF, "  %s\n", obj->name);
     }
 
     if (empty) {
