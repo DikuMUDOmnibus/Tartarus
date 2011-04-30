@@ -99,5 +99,6 @@ int valid_username(const char *username);
 int load_player_file(player_t *ch, const char *filename);
 int save_player_file(player_t *ch);
 game_object_t *lookup_inventory_object(player_t *c, const char *key);
+game_object_t *lookup_equipped_object(player_t *c, const char *key);
 
 #endif

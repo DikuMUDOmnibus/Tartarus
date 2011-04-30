@@ -222,12 +222,12 @@ int save_player_file(player_t *c) {
     return 0;
 }
 
-game_object_t *lookup_inventory_object(player_t *c, const char *key) {
+static game_object_t *lookup_object(game_object_t *list, const char *key) {
     game_object_t *obj, *tmp;
 
     obj = NULL;
 
-    for (tmp = c->inventory; tmp; tmp = tmp->next) {
+    for (tmp = list; tmp; tmp = tmp->next) {
         if (object_matches_key(tmp, key)) {
             obj = tmp;
             break;
@@ -235,4 +235,12 @@ game_object_t *lookup_inventory_object(player_t *c, const char *key) {
     }
 
     return obj;
+}
+
+game_object_t *lookup_inventory_object(player_t *c, const char *key) {
+    return lookup_object(c->inventory, key);
+}
+
+game_object_t *lookup_equipped_object(player_t *c, const char *key) {
+    return lookup_object(c->equipment, key);
 }

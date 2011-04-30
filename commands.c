@@ -49,6 +49,7 @@ static int do_look(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
 static int do_wear(player_t *ch, char *arg);
+static int do_remove(player_t *ch, char *arg);
 
 static int do_quit(player_t *ch, char *arg);
 static int do_save(player_t *ch, char *arg);
@@ -72,10 +73,12 @@ static struct command_s commands[] = {
     {"n", do_north},
     {"north", do_north},
 
+    {"quit", do_quit},
+
+    {"remove", do_remove},
+
     {"s", do_south},
     {"south", do_south},
-
-    {"quit", do_quit},
     {"save", do_save},
     {"say", do_say},
 
@@ -274,6 +277,50 @@ static int do_wear(player_t *c, char *arg) {
         send_to_char(c, "You can't wear that!\n");
     } else {
         send_to_char(c, "You aren't carrying that.\n");
+    }
+
+    return 0;
+}
+
+static int do_remove(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+    game_object_t *obj, *cur, *prev;
+
+    while (*arg == ' ')
+        ++arg;
+
+    if (!arg || *arg == '\0') {
+        send_to_char(c, "What do you want to wear?\n");
+        return -1;
+    }
+
+    obj = lookup_equipped_object(c, arg);
+    cur = prev = NULL;
+
+    if (obj) {
+        for (cur = c->equipment; cur; prev = cur, cur = cur->next) {
+            if (cur == obj) {
+                if (!prev)
+                    c->equipment = cur->next;
+                else
+                    prev->next = cur->next;
+                break;
+            }
+        }
+
+        obj->next = c->inventory;
+        c->inventory = obj;
+        c->wearing &= ~obj->wear_location;
+
+        char obj_name[MAX_NAME_LEN * 2];
+        colorize_object_name(obj, obj_name);
+        snprintf(buf, MAXBUF, "\n%s removed '%s'\n", c->username, obj_name);
+        send_to_room_from_char(c, buf);
+        snprintf(pbuf, MAXBUF, "You removed '%s'\n", obj_name);
+        send_to_char(c, pbuf);
+    } else {
+        send_to_char(c, "You aren't wearing that.\n");
     }
 
     return 0;
