@@ -250,7 +250,7 @@ static int do_remove(player_t *c, char *arg) {
         ++arg;
 
     if (!arg || *arg == '\0') {
-        send_to_char(c, "What do you want to wear?\n");
+        send_to_char(c, "What do you want to remove?\n");
         return -1;
     }
 
