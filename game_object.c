@@ -55,7 +55,7 @@ bool object_matches_key(const game_object_t *obj, const char *key) {
     return res;
 }
 
-void object_name(game_object_t *obj, char *writebuf) {
+void colorize_object_name(game_object_t *obj, char *writebuf) {
     /* transforms an object's name string into a colored string based
      * on its rarity. */
     char msg[MAX_NAME_LEN * 2];

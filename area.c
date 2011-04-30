@@ -146,7 +146,7 @@ int room_description(room_t *room, player_t *ch, char *buf) {
             empty = 0;
             n += sprintf(buf+n, "\nItems:\n");
         }
-        object_name(roomobj, obj_name);
+        colorize_object_name(roomobj, obj_name);
         n += sprintf(buf+n, "  %s\n", obj_name);
     }
 

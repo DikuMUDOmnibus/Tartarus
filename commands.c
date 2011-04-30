@@ -165,10 +165,11 @@ static int do_take(player_t *c, char *arg) {
         roomobj->next = c->inventory;
         c->inventory = roomobj;
 
-        /* TODO: function that returns a color-coded object name string */
-        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, roomobj->name);
+        char obj_name[MAX_NAME_LEN * 2];
+        colorize_object_name(roomobj, obj_name);
+        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, obj_name);
         send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You take '%s'\n", roomobj->name);
+        snprintf(pbuf, MAXBUF, "You take '%s'\n", obj_name);
         send_to_char(c, pbuf);
     } else if (roomobj && roomobj->is_static) {
         send_to_char(c, "You can't take that.\n");
@@ -212,9 +213,11 @@ static int do_drop(player_t *c, char *arg) {
         userobj->next = room->objects;
         room->objects = userobj;
 
-        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, userobj->name);
+        char obj_name[MAX_NAME_LEN * 2];
+        colorize_object_name(userobj, obj_name);
+        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, obj_name);
         send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", userobj->name);
+        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", obj_name);
         send_to_char(c, pbuf);
     } else {
         send_to_char(c, "You aren't carrying that.\n");
@@ -240,7 +243,7 @@ static int do_look(player_t *c, char *arg) {
 
 static int do_inventory(player_t *c, char *arg) {
     int n, empty;
-    char buf[MAXBUF];
+    char buf[MAXBUF], obj_name[MAX_NAME_LEN * 2];
     game_object_t *obj;
 
     n = snprintf(buf, MAXBUF, "Inventory:\n");
@@ -248,7 +251,8 @@ static int do_inventory(player_t *c, char *arg) {
 
     for (obj = c->inventory; obj; obj = obj->next) {
         empty = 0;
-        n += snprintf(buf+n, MAXBUF, "  %s\n", obj->name);
+        colorize_object_name(obj, obj_name);
+        n += snprintf(buf+n, MAXBUF, "  %s\n", obj_name);
     }
 
     if (empty) {
