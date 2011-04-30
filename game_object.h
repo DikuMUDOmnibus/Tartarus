@@ -100,6 +100,7 @@ void free_game_objects(void);
 
 /* game_object.c */
 bool object_matches_key(const game_object_t *obj, const char *key);
+int remove_game_object_from_list(game_object_t **list, game_object_t *obj);
 void colorize_object_name(game_object_t *obj, char *writebuf);
 
 void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json);

@@ -55,6 +55,25 @@ bool object_matches_key(const game_object_t *obj, const char *key) {
     return res;
 }
 
+int remove_game_object_from_list(game_object_t **list, game_object_t *obj) {
+    game_object_t *cur, *prev;
+
+    prev = NULL;
+
+    for (cur = *list; cur; prev = cur, cur = cur->next) {
+        if (cur == obj) {
+            if (!prev)
+                *list = cur->next;
+            else
+                prev->next = cur->next;
+            return 0;
+        }
+    }
+
+    /* object isn't in list */
+    return -1;
+}
+
 void colorize_object_name(game_object_t *obj, char *writebuf) {
     /* transforms an object's name string into a colored string based
      * on its rarity. */

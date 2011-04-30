@@ -153,17 +153,10 @@ static int do_take(player_t *c, char *arg) {
     room = area_table[c->area_id]->rooms[c->room_id];
     roomobj = lookup_room_object(room, arg);
 
-    game_object_t *cur, *prev = NULL;
-
     if (roomobj && !roomobj->is_static) {
-        for (cur = room->objects; cur; prev = cur, cur = cur->next) {
-            if (cur == roomobj) {
-                if (!prev)
-                    room->objects = cur->next;
-                else
-                    prev->next = cur->next;
-                break;
-            }
+        if (remove_game_object_from_list(&room->objects, roomobj) == -1) {
+            printf("wtf?\n");
+            return -1;
         }
 
         roomobj->next = c->inventory;
@@ -201,17 +194,10 @@ static int do_drop(player_t *c, char *arg) {
     room = area_table[c->area_id]->rooms[c->room_id];
     userobj = lookup_inventory_object(c, arg);
 
-    game_object_t *cur, *prev = NULL;
-
     if (userobj) {
-        for (cur = c->inventory; cur; prev = cur, cur = cur->next) {
-            if (cur == userobj) {
-                if (!prev)
-                    c->inventory = cur->next;
-                else
-                    prev->next = cur->next;
-                break;
-            }
+        if (remove_game_object_from_list(&c->inventory, userobj) == -1) {
+            printf("wtf?\n");
+            return -1;
         }
 
         userobj->next = room->objects;
@@ -253,14 +239,9 @@ static int do_wear(player_t *c, char *arg) {
             return 0;
         }
 
-        for (cur = c->inventory; cur; prev = cur, cur = cur->next) {
-            if (cur == invobj) {
-                if (!prev)
-                    c->inventory = cur->next;
-                else
-                    prev->next = cur->next;
-                break;
-            }
+        if (remove_game_object_from_list(&c->inventory, invobj) == -1) {
+            printf("wtf?\n");
+            return -1;
         }
 
         invobj->next = c->equipment;
@@ -299,14 +280,9 @@ static int do_remove(player_t *c, char *arg) {
     cur = prev = NULL;
 
     if (obj) {
-        for (cur = c->equipment; cur; prev = cur, cur = cur->next) {
-            if (cur == obj) {
-                if (!prev)
-                    c->equipment = cur->next;
-                else
-                    prev->next = cur->next;
-                break;
-            }
+        if (remove_game_object_from_list(&c->equipment, obj) == -1) {
+            printf("wtf?\n");
+            return -1;
         }
 
         obj->next = c->inventory;
