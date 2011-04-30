@@ -136,20 +136,6 @@ static int do_say(player_t *c, char *arg) {
     return 0;
 }
 
-static void send_object_interaction(player_t *c, game_object_t *obj,
-                                    const char *roomstr, const char *mystr) {
-    char buf[MAXBUF];
-    char pbuf[MAXBUF];
-    char objname[MAX_NAME_LEN * 2];
-
-    colorize_object_name(obj, objname);
-    snprintf(buf, MAXBUF, roomstr, c->username, objname);
-    send_to_room_from_char(c, buf);
-
-    snprintf(pbuf, MAXBUF, mystr, objname);
-    send_to_char(c, pbuf);
-}
-
 static int do_take(player_t *c, char *arg) {
     room_t *room;
     game_object_t *roomobj;
