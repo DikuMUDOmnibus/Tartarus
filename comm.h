@@ -51,5 +51,7 @@ void send_to_all(const char *msg);
 void send_to_all_except(player_t *c, const char *msg);
 void send_to_room_from_char(player_t *c, const char *msg);
 void send_to_room(room_t *room, const char *msg);
+void send_object_interaction(player_t *c, game_object_t *obj,
+                             const char *roomstr, const char *mystr);
 
 #endif

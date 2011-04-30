@@ -136,9 +136,21 @@ static int do_say(player_t *c, char *arg) {
     return 0;
 }
 
-static int do_take(player_t *c, char *arg) {
+static void send_object_interaction(player_t *c, game_object_t *obj,
+                                    const char *roomstr, const char *mystr) {
     char buf[MAXBUF];
     char pbuf[MAXBUF];
+    char objname[MAX_NAME_LEN * 2];
+
+    colorize_object_name(obj, objname);
+    snprintf(buf, MAXBUF, roomstr, c->username, objname);
+    send_to_room_from_char(c, buf);
+
+    snprintf(pbuf, MAXBUF, mystr, objname);
+    send_to_char(c, pbuf);
+}
+
+static int do_take(player_t *c, char *arg) {
     room_t *room;
     game_object_t *roomobj;
 
@@ -162,12 +174,7 @@ static int do_take(player_t *c, char *arg) {
         roomobj->next = c->inventory;
         c->inventory = roomobj;
 
-        char obj_name[MAX_NAME_LEN * 2];
-        colorize_object_name(roomobj, obj_name);
-        snprintf(buf, MAXBUF, "\n%s takes '%s'\n", c->username, obj_name);
-        send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You take '%s'\n", obj_name);
-        send_to_char(c, pbuf);
+        send_object_interaction(c, roomobj, "\n%s takes '%s'\n", "You take '%s'\n");
     } else if (roomobj && roomobj->is_static) {
         send_to_char(c, "You can't take that.\n");
     } else {
@@ -178,8 +185,6 @@ static int do_take(player_t *c, char *arg) {
 }
 
 static int do_drop(player_t *c, char *arg) {
-    char buf[MAXBUF];
-    char pbuf[MAXBUF];
     room_t *room;
     game_object_t *userobj;
 
@@ -203,12 +208,7 @@ static int do_drop(player_t *c, char *arg) {
         userobj->next = room->objects;
         room->objects = userobj;
 
-        char obj_name[MAX_NAME_LEN * 2];
-        colorize_object_name(userobj, obj_name);
-        snprintf(buf, MAXBUF, "\n%s dropped '%s'\n", c->username, obj_name);
-        send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You dropped '%s'\n", obj_name);
-        send_to_char(c, pbuf);
+        send_object_interaction(c, userobj, "\n%s dropped '%s'\n", "You dropped '%s'\n");
     } else {
         send_to_char(c, "You aren't carrying that.\n");
     }
@@ -217,8 +217,6 @@ static int do_drop(player_t *c, char *arg) {
 }
 
 static int do_wear(player_t *c, char *arg) {
-    char buf[MAXBUF];
-    char pbuf[MAXBUF];
     game_object_t *invobj, *cur, *prev;
 
     while (*arg == ' ')
@@ -248,12 +246,7 @@ static int do_wear(player_t *c, char *arg) {
         c->equipment = invobj;
         c->wearing |= invobj->wear_location;
 
-        char obj_name[MAX_NAME_LEN * 2];
-        colorize_object_name(invobj, obj_name);
-        snprintf(buf, MAXBUF, "\n%s equipped '%s'\n", c->username, obj_name);
-        send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You equipped '%s'\n", obj_name);
-        send_to_char(c, pbuf);
+        send_object_interaction(c, invobj, "\n%s equipped '%s'\n", "You equipped '%s'\n");
     } else if (invobj && invobj->type != ARMOR_TYPE) {
         send_to_char(c, "You can't wear that!\n");
     } else {
@@ -264,8 +257,6 @@ static int do_wear(player_t *c, char *arg) {
 }
 
 static int do_remove(player_t *c, char *arg) {
-    char buf[MAXBUF];
-    char pbuf[MAXBUF];
     game_object_t *obj, *cur, *prev;
 
     while (*arg == ' ')
@@ -289,12 +280,7 @@ static int do_remove(player_t *c, char *arg) {
         c->inventory = obj;
         c->wearing &= ~obj->wear_location;
 
-        char obj_name[MAX_NAME_LEN * 2];
-        colorize_object_name(obj, obj_name);
-        snprintf(buf, MAXBUF, "\n%s removed '%s'\n", c->username, obj_name);
-        send_to_room_from_char(c, buf);
-        snprintf(pbuf, MAXBUF, "You removed '%s'\n", obj_name);
-        send_to_char(c, pbuf);
+        send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
     } else {
         send_to_char(c, "You aren't wearing that.\n");
     }

@@ -91,3 +91,18 @@ void send_to_room(room_t *room, const char *msg) {
         }
     }
 }
+
+void send_object_interaction(player_t *c, game_object_t *obj,
+                             const char *roomstr, const char *mystr) {
+    /* used for take, drop, wear, remove, etc */
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+    char objname[MAX_NAME_LEN * 2];
+
+    colorize_object_name(obj, objname);
+    snprintf(buf, MAXBUF, roomstr, c->username, objname);
+    send_to_room_from_char(c, buf);
+
+    snprintf(pbuf, MAXBUF, mystr, objname);
+    send_to_char(c, pbuf);
+}
