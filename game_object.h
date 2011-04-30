@@ -41,6 +41,18 @@
 #define RARE_COLOR      ANSI_DBLUE
 #define ELITE_COLOR     ANSI_PURPLE
 
+#define WEAR_HEAD       (1 << 0)
+#define WEAR_CHEST      (1 << 1)
+#define WEAR_SHOULDERS  (1 << 2)
+#define WEAR_ARMS       (1 << 3)
+#define WEAR_LWRIST     (1 << 4)
+#define WEAR_RWRIST     (1 << 5)
+#define WEAR_LFINGER    (1 << 6)
+#define WEAR_RFINGER    (1 << 7)
+#define WEAR_WAIST      (1 << 8)
+#define WEAR_LEGS       (1 << 9)
+#define WEAR_FEET       (1 << 10)
+
 enum object_rarity {
     COMMON = 0,
     LIMITED,
@@ -51,19 +63,6 @@ enum object_rarity {
 enum object_type {
     WEAPON_TYPE = 0,
     ARMOR_TYPE
-};
-
-enum WEAR_LOCATION {
-    WEAR_NONE = 0,
-    HEAD,
-    CHEST,
-    SHOULDERS,
-    ARMS,
-    WRISTS,
-    FINGERS,
-    WAIST,
-    LEGS,
-    FEET
 };
 
 typedef struct game_object_s {
@@ -77,7 +76,7 @@ typedef struct game_object_s {
 
     enum object_rarity rarity;
     enum object_type type;
-    enum WEAR_LOCATION wear_location;
+    unsigned int wear_location;
 
     /* rooms can have static (non-removable) objects
      * and dynamic (removable) objects */

@@ -32,8 +32,17 @@
                     "rarity": 1,
                     "type": 1,
                     "armor": 10,
-                    "wear_location": 9,
+                    "wear_location": 1024,
                     "keywords": ["leather", "boots", "leather boots"]
+                },
+                {
+                    "name": "Sandals",
+                    "is_static": 0,
+                    "rarity": 1,
+                    "type": 1,
+                    "armor": 5,
+                    "wear_location": 1024,
+                    "keywords": ["sandals"]
                 }
             ]
         },

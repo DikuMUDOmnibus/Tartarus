@@ -48,6 +48,7 @@ static int do_inventory(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
+static int do_wear(player_t *ch, char *arg);
 
 static int do_quit(player_t *ch, char *arg);
 static int do_save(player_t *ch, char *arg);
@@ -81,7 +82,7 @@ static struct command_s commands[] = {
     {"t", do_take},
     {"take", do_take},
 
-    //{"wear", do_wear},
+    {"wear", do_wear},
 
     {"w", do_west},
     {"west", do_west}
@@ -219,6 +220,58 @@ static int do_drop(player_t *c, char *arg) {
         send_to_room_from_char(c, buf);
         snprintf(pbuf, MAXBUF, "You dropped '%s'\n", obj_name);
         send_to_char(c, pbuf);
+    } else {
+        send_to_char(c, "You aren't carrying that.\n");
+    }
+
+    return 0;
+}
+
+static int do_wear(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    char pbuf[MAXBUF];
+    game_object_t *invobj, *cur, *prev;
+
+    while (*arg == ' ')
+        ++arg;
+
+    if (!arg || *arg == '\0') {
+        send_to_char(c, "What do you want to wear?\n");
+        return -1;
+    }
+
+    invobj = lookup_inventory_object(c, arg);
+    cur = prev = NULL;
+
+    if (invobj && invobj->type == ARMOR_TYPE) {
+        if ((c->wearing & invobj->wear_location) != 0) {
+            /* TODO: better message about location */
+            send_to_char(c, "You're already wearing something like that.\n");
+            return 0;
+        }
+
+        for (cur = c->inventory; cur; prev = cur, cur = cur->next) {
+            if (cur == invobj) {
+                if (!prev)
+                    c->inventory = cur->next;
+                else
+                    prev->next = cur->next;
+                break;
+            }
+        }
+
+        invobj->next = c->equipment;
+        c->equipment = invobj;
+        c->wearing |= invobj->wear_location;
+
+        char obj_name[MAX_NAME_LEN * 2];
+        colorize_object_name(invobj, obj_name);
+        snprintf(buf, MAXBUF, "\n%s equipped '%s'\n", c->username, obj_name);
+        send_to_room_from_char(c, buf);
+        snprintf(pbuf, MAXBUF, "You equipped '%s'\n", obj_name);
+        send_to_char(c, pbuf);
+    } else if (invobj && invobj->type != ARMOR_TYPE) {
+        send_to_char(c, "You can't wear that!\n");
     } else {
         send_to_char(c, "You aren't carrying that.\n");
     }

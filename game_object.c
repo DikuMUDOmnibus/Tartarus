@@ -116,7 +116,7 @@ game_object_t *game_object_from_json(json_t *json) {
     if (obj->type == ARMOR_TYPE)
         obj->wear_location = json_int_from_obj_key(json, "wear_location");
     else
-        obj->wear_location = WEAR_NONE;
+        obj->wear_location = 0;
 
     sprintf(obj->name, "%s", json_str_from_obj_key(json, "name"));
     return obj;

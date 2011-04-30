@@ -102,15 +102,25 @@ int load_player_file(player_t *ch, const char *filename) {
     ch->armor = json_int_from_obj_key(jsp, "armor");
 
     ch->inventory = NULL;
+    ch->equipment = NULL;
 
     inv = json_object_get(jsp, "inventory");
     inv_size = json_array_size(inv);
-
     for (i = 0; i < inv_size; ++i) {
         js_inventory = json_array_get(inv, i);
         inv_obj = game_object_from_json(js_inventory);
         inv_obj->next = ch->inventory;
         ch->inventory = inv_obj;
+    }
+
+    inv = json_object_get(jsp, "equipment");
+    inv_size = json_array_size(inv);
+    for (i = 0; i < inv_size; ++i) {
+        js_inventory = json_array_get(inv, i);
+        inv_obj = game_object_from_json(js_inventory);
+        inv_obj->next = ch->equipment;
+        ch->equipment = inv_obj;
+        ch->wearing |= inv_obj->wear_location;
     }
 
     json_decref(jsp);
@@ -158,6 +168,16 @@ static char *player_json(player_t *ch) {
     }
 
     json_object_set(jsp, "inventory", arr);
+    json_decref(arr);
+
+    arr = json_array();
+    for (obj = ch->equipment; obj; obj = obj->next) {
+        jsobj = game_object_to_json(obj);
+        json_array_append(arr, jsobj);
+        json_decref(jsobj);
+    }
+
+    json_object_set(jsp, "equipment", arr);
     json_decref(arr);
 
     res = json_dumps(jsp, JSON_INDENT(4));

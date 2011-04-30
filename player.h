@@ -80,8 +80,9 @@ typedef struct player_s {
     int area_id;
     int room_id;
 
-    game_object_t *inventory; /* pointer to head of inventory */
-    game_object_t *equipped;
+    game_object_t *inventory;   /* pointer to head of inventory */
+    game_object_t *equipment;   /* worn objects, not in inventory */
+    unsigned int wearing;       /* bitfield of wear locations being used */
 
     int armor;
 } player_t;
