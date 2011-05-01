@@ -53,6 +53,7 @@ int load_area_file(area_t *area, const char *filename) {
     room_t *room;
 
     json_t *jsp, *obj, *rooms_obj;
+    json_t *exits, *exit_areas, *locked_exits, *tmp;
     json_error_t jserror;
 
     sprintf(path, "%s/%s", AREA_DATA_DIR, filename);
@@ -81,16 +82,17 @@ int load_area_file(area_t *area, const char *filename) {
         sprintf(room->name, "%s", json_str_from_obj_key(room_array_obj, "name"));
         sprintf(room->description, "%s", json_str_from_obj_key(room_array_obj, "description"));
 
-        obj = json_object_get(room_array_obj, "exits");
-        for (j = 0; j < sizeof(room->exits)/sizeof(int); ++j) {
-            json_t *exitobj = json_array_get(obj, j);
-            room->exits[j] = json_integer_value(exitobj);
-        }
+        exits = json_object_get(room_array_obj, "exits");
+        exit_areas = json_object_get(room_array_obj, "exit_areas");
+        locked_exits = json_object_get(room_array_obj, "locked_exits");
 
-        obj = json_object_get(room_array_obj, "exit_areas");
-        for (j = 0; j < sizeof(room->exit_areas)/sizeof(int); ++j) {
-            json_t *exit_area_obj = json_array_get(obj, j);
-            room->exit_areas[j] = json_integer_value(exit_area_obj);
+        for (j = 0; j < MAX_ROOM_EXITS; ++j) {
+            tmp = json_array_get(exits, j);
+            room->exits[j] = json_integer_value(tmp);
+            tmp = json_array_get(exit_areas, j);
+            room->exit_areas[j] = json_integer_value(tmp);
+            tmp = json_array_get(locked_exits, j);
+            room->locked_exits[j] = json_integer_value(tmp);
         }
 
         obj = json_object_get(room_array_obj, "objects");

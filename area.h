@@ -50,6 +50,9 @@ typedef struct room_s {
     /* area indexes for these exits */
     int exit_areas[MAX_ROOM_EXITS];
 
+    /* 0 for unlocked, 1 for locked */
+    int locked_exits[MAX_ROOM_EXITS];
+
     /* generally a room won't have thousands of objects */
     game_object_t *objects;
 

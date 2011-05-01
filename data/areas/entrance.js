@@ -9,6 +9,7 @@
             "description": "The entrance to Tartarus is filled with the souls of those who\ncommitted horrible crimes on Earth. They are here waiting for\nadmission into a hell of their own creation. The way out of\nTartarus is blocked by a vast river of fire.",
             "exits": [1, -1, -1, -1],
             "exit_areas": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": []
         },
         {
@@ -18,6 +19,7 @@
             "description": "The walls are painted in fresh, warm blood. Demons scurry about\nin butcher's aprons covered in human blood. You hear the\nscreams of people being torn apart by various instruments of pain.\nTheir bodies have been reanimated to feel excruciating death over and over.",
             "exits": [-1, 2, 0, 3],
             "exit_areas": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": [
                 {
                     "name": "Nail Bat",
@@ -37,6 +39,7 @@
             "description": "You can hear the echoes of screams from the Torture Chamber\nnext door. You see vast pits of fire filled with the souls\nof arsons brought here to suffer the pain of death by fire.",
             "exits": [5, -1, -1, 1],
             "exit_areas": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": [
                 {
                     "name": "Leather Boots",
@@ -65,6 +68,7 @@
             "description": "Lesser demons sit around circular tables while dining\non human meat. The humans are being eaten alive and made\nto watch as the demons devour their raw flesh.",
             "exits": [-1, 1, -1, 4],
             "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": [
                 {
                     "name": "Rusty Steak Knife",
@@ -84,6 +88,7 @@
             "description": "Servant demons prepare different meals for the lesser\ndemons to consume. Some of the choice foods are Boiled\nHands Soup, Raw Thigh Steaks, and even steamed eyeballs.",
             "exits": [-1, 3, -1, -1],
             "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": []
         },
         {
@@ -93,6 +98,7 @@
             "description": "As you walk farther from the torture chamber, the screams\nare now muffled. Empty suits of demonic armor line the\nwalls. As you make your way through the hall, you can't\nhelp but feel like you're being watched.",
             "exits": [6, -1, 2, -1],
             "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": []
         },
         {
@@ -102,6 +108,7 @@
             "description": "This section of the hall is adorned with swords hanging from\nthe walls. It might be possible to rip one off the wall...",
             "exits": [7, -1, 5, -1],
             "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": [
                 {
                     "name": "Bronze Short Sword",
@@ -119,8 +126,19 @@
             "area_id": 0,
             "name": "Sleeping Quarters",
             "description": "One of the lesser demons is asleep on a bed of hot coals.\nYou should try killing it while it's still sleeping.",
-            "exits": [-1, -1, 6, -1],
+            "exits": [-1, -1, 6, 8],
             "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 1],
+            "objects": []
+        },
+        {
+            "id": 8,
+            "area_id": 0,
+            "name": "Locked Room",
+            "description": "Test",
+            "exits": [-1, 7, -1, -1],
+            "exit_area": [0, 0, 0, 0],
+            "locked_exits": [0, 0, 0, 0],
             "objects": []
         }
     ]

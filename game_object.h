@@ -64,7 +64,8 @@ enum object_rarity {
 
 enum object_type {
     WEAPON_TYPE = 0,
-    ARMOR_TYPE
+    ARMOR_TYPE,
+    KEY_TYPE
 };
 
 typedef struct game_object_s {

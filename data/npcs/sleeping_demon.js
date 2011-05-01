@@ -7,6 +7,15 @@
     "color": "&R",
     "ch_state": 2,
     "is_mobile": 0,
-    "inventory": [],
+    "inventory": [
+        {
+            "name": "Key",
+            "area_id": 0,
+            "room_id": 8,
+            "rarity": 0,
+            "type": 2,
+            "keywords": ["key"]
+        }
+    ],
     "keywords": ["sleeping", "demon", "sleeping demon"]
 }

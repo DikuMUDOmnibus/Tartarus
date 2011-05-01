@@ -464,6 +464,11 @@ static int do_move(player_t *c, int dir) {
         return -1;
     }
 
+    if (cur->locked_exits[dir] == 1) {
+        send_to_char(c, "That door is locked.\n");
+        return -1;
+    }
+
     const char *todir = exit_names[dir];
     snprintf(buf, MAXBUF, "\n%s leaves to the %s.\n", c->username, todir);
     send_to_room_from_char(c, buf);
