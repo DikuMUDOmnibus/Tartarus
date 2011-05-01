@@ -38,7 +38,8 @@
 #define MAX_ROOM_EXITS 4
 
 typedef struct room_s {
-    char name[64];
+    char name[MAX_NAME_LEN];
+    char description[512];
     int id;
     int area_id;        /* area this room belongs to */
 

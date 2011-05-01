@@ -79,6 +79,7 @@ int load_area_file(area_t *area, const char *filename) {
         room->id = json_int_from_obj_key(room_array_obj, "id");
         room->area_id = json_int_from_obj_key(room_array_obj, "area_id");
         sprintf(room->name, "%s", json_str_from_obj_key(room_array_obj, "name"));
+        sprintf(room->description, "%s", json_str_from_obj_key(room_array_obj, "description"));
 
         obj = json_object_get(room_array_obj, "exits");
         for (j = 0; j < sizeof(room->exits)/sizeof(int); ++j) {
@@ -125,7 +126,7 @@ int room_description(room_t *room, player_t *ch, char *buf) {
         return -1;
     }
 
-    n = sprintf(buf, "\n%s\nExits: ", room->name);
+    n = sprintf(buf, "\n%s\n%s\nExits: ", room->name, room->description);
     for (i = 0, j = 0; i < MAX_ROOM_EXITS; ++i) {
         if (room->exits[i] > -1) {
             if (j > 0 && j < MAX_ROOM_EXITS - 1) {
@@ -144,13 +145,13 @@ int room_description(room_t *room, player_t *ch, char *buf) {
         if (empty) {
             /* only show room items string if there are any items */
             empty = 0;
-            n += sprintf(buf+n, "\nItems:\n");
+            n += sprintf(buf+n, "\n\nItems:");
         }
         colorize_object_name(roomobj, obj_name);
-        n += sprintf(buf+n, "  %s\n", obj_name);
+        n += sprintf(buf+n, "\n  %s", obj_name);
     }
 
-    n += sprintf(buf+n, "\n");
+    n += sprintf(buf+n, "\n\n");
 
     npc_t *npc;
     for (npc = room->npcs; npc; npc = npc->next_in_room) {
@@ -169,8 +170,6 @@ int room_description(room_t *room, player_t *ch, char *buf) {
             n += sprintf(buf+n, "\n  %s", p->username);
         }
     }
-
-    n += sprintf(buf+n, "\n");
 
     return n;
 }

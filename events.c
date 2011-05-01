@@ -80,12 +80,12 @@ static void ev_game_tick(const int fd, const short which, void *arg) {
     evtimer_set(&game_tick, ev_game_tick, 0);
     event_base_set(main_base, &game_tick);
     evtimer_add(&game_tick, &t);
-    send_to_all("\n&RSuper-heated air from the river of fire envelops you.\n\n");
+    send_to_all("\n&RSuper-heated air from the river of fire envelops you.\n");
 }
 
 static void ev_mobile_tick(const int fd, const short which, void *arg) {
     /* update mobiles every N seconds */
-    struct timeval t = {.tv_sec = 30, .tv_usec = 0};
+    struct timeval t = {.tv_sec = 5, .tv_usec = 0};
     static bool initialized = false;
 
     if (initialized) {
@@ -99,7 +99,7 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
     evtimer_add(&mobile_tick, &t);
 
     int i, j, dir = -1;
-    int bfrom = 0, bto = 0, moving = 0;
+    int bfrom = 0, bto = 0;
     char frombuf[MAXBUF], tobuf[MAXBUF];
 
     npc_t *npc;
@@ -121,7 +121,6 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
 
             if (dir != -1) {
                 /* npc can move */
-                moving = 1;
                 const char *todir = exit_names[dir];
                 const char *fromdir = reverse_exit_names[dir];
                 memset(tobuf, 0, MAXBUF);
@@ -345,7 +344,7 @@ void ev_socket_write(const int fd, const short which, void *arg) {
 
     if (c->game_state == game_state_playing) {
         /* Write prompt to socket */
-        snprintf(prompt, MAXBUF, "> ");
+        snprintf(prompt, MAXBUF, "\n> ");
 
         to_write = strlen(prompt)+1;
         len = 0;
@@ -493,7 +492,7 @@ static int handle_input(player_t *c) {
             snprintf(buf, MAXBUF, "\n%s has entered Tartarus.\n", c->username);
             send_to_all_except(c, buf);
 
-            send_to_char(c, "&RYou've arrived in Tartarus.\n\n");
+            send_to_char(c, "&RYou've arrived in Tartarus.\n");
         } else {
             /* TODO: fix this... it's a hack for now */
             close(c->sfd);
