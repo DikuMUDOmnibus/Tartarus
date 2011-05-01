@@ -215,7 +215,7 @@ static void load_areas(void) {
 
     area_t *area;
     area = (area_t *)malloc(sizeof(area_t));
-    load_area_file(area, "default_area.js");
+    load_area_file(area, "entrance.js");
     area_table[area->id] = area;
 }
 
