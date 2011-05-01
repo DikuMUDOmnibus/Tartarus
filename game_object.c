@@ -136,6 +136,7 @@ game_object_t *game_object_from_json(json_t *json) {
 
     /* XXX: should I limit armor values to just wearable armor? */
     obj->armor = json_int_from_obj_key(json, "armor");
+    obj->damage = json_int_from_obj_key(json, "damage");
 
     if (obj->type == ARMOR_TYPE)
         obj->wear_location = json_int_from_obj_key(json, "wear_location");
@@ -167,6 +168,7 @@ json_t *game_object_to_json(game_object_t *obj) {
     json_object_set(json, "rarity", json_integer(obj->rarity));
     json_object_set(json, "type", json_integer(obj->type));
     json_object_set(json, "armor", json_integer(obj->armor));
+    json_object_set(json, "damage", json_integer(obj->damage));
     json_object_set(json, "wear_location", json_integer(obj->wear_location));
     json_object_set(json, "keywords", keywords);
     json_decref(keywords);

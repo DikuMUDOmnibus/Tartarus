@@ -73,5 +73,6 @@ int load_all_npcs(const char *filename);
 
 void npc_free(npc_t *npc);
 void free_all_npcs(void);
+bool npc_matches_key(const npc_t *npc, const char *key);
 
 #endif

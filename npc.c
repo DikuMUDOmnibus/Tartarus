@@ -58,6 +58,23 @@ void free_all_npcs(void) {
     }
 }
 
+bool npc_matches_key(const npc_t *npc, const char *key) {
+    int i;
+    bool res = false;
+    if (npc) {
+        for (i = 0; i < MAX_KEYWORDS; ++i) {
+            if (npc->keywords[i]) {
+                if (strncasecmp(npc->keywords[i], key, strlen(key)) == 0) {
+                    res = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
 int load_npc_file(npc_t *npc, const char *filename) {
     char path[PATH_MAX];
     int inv_size, i;
@@ -77,6 +94,10 @@ int load_npc_file(npc_t *npc, const char *filename) {
     npc->room_id = json_int_from_obj_key(jsp, "room_id");
     npc->ch_state = json_int_from_obj_key(jsp, "ch_state");
     npc->is_mobile = json_int_from_obj_key(jsp, "is_mobile");
+
+    npc->maxhp = npc->curhp = json_int_from_obj_key(jsp, "maxhp");
+    npc->armor = json_int_from_obj_key(jsp, "armor");
+
     keywords_from_json(npc->keywords, jsp);
 
     memset(npc->inventory, 0, sizeof(npc->inventory));

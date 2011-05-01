@@ -49,6 +49,7 @@ static int do_west(player_t *ch, char *arg);
 static int do_drop(player_t *ch, char *arg);
 static int do_equipment(player_t *ch, char *arg);
 static int do_inventory(player_t *ch, char *arg);
+static int do_kill(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
@@ -76,6 +77,9 @@ static struct command_s commands[] = {
 
     {"i", do_inventory},
     {"inventory", do_inventory},
+
+    {"k", do_kill},
+    {"kill", do_kill},
 
     {"l", do_look},
     {"look", do_look},
@@ -242,6 +246,7 @@ static int do_use(player_t *c, char *arg) {
 
         invobj->next = NULL;
         c->weapon = invobj;
+        c->damage += c->weapon->damage;
 
         send_object_interaction(c, invobj, "\n%s equipped '%s'\n", "You equipped '%s'\n");
     } else if (invobj && invobj->type != WEAPON_TYPE) {
@@ -317,9 +322,58 @@ static int do_remove(player_t *c, char *arg) {
         obj->next = c->inventory;
         c->inventory = obj;
         c->weapon = NULL;
+        c->damage -= obj->damage;
         send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
     } else {
         send_to_char(c, "You aren't wearing that.\n");
+    }
+
+    return 0;
+}
+
+static int do_kill(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    npc_t *npc;
+    room_t *room;
+    int dam;
+
+    if (!has_arg(&arg)) {
+        send_to_char(c, "Who are you trying to kill?\n");
+        return -1;
+    }
+
+    player_room(c, &room);
+    for (npc = room->npcs; npc; npc = npc->next_in_room) {
+        if (npc_matches_key(npc, arg))
+            break;
+    }
+
+    if (npc && npc->ch_state > CHAR_DEAD) {
+        dam = npc->armor + npc->curhp;
+
+        /* deal extra damage if the enemy can't fight back */
+        if (npc->ch_state == CHAR_DYING || npc->ch_state == CHAR_SLEEPING)
+            dam -= c->str * c->damage * 2;
+        else
+            dam -= c->str * c->damage;
+
+        if (dam <= 0) {
+            if (npc->ch_state == CHAR_SLEEPING)
+                sprintf(buf, "You murdered %s%s&D in their sleep!\n", npc->color, npc->name);
+            else
+                sprintf(buf, "You killed %s%s&D!\n", npc->color, npc->name);
+
+            npc->curhp = 0;
+            npc->ch_state = CHAR_DEAD;
+            send_to_char(c, buf);
+        } else {
+            sprintf(buf, "%s%s&D says, \"Don't even think about it!\"\n", npc->color, npc->name);
+            send_to_char(c, buf);
+        }
+    } else if (npc && npc->ch_state == CHAR_DEAD) {
+        send_to_char(c, "They are already dead.\n");
+    } else {
+        send_to_char(c, "They aren't here.\n");
     }
 
     return 0;
