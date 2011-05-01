@@ -52,6 +52,7 @@ static int do_inventory(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
+static int do_use(player_t *ch, char *arg);
 static int do_wear(player_t *ch, char *arg);
 static int do_remove(player_t *ch, char *arg);
 
@@ -93,6 +94,8 @@ static struct command_s commands[] = {
 
     {"t", do_take},
     {"take", do_take},
+
+    {"use", do_use},
 
     {"wear", do_wear},
 
@@ -216,8 +219,42 @@ static int do_drop(player_t *c, char *arg) {
     return 0;
 }
 
+static int do_use(player_t *c, char *arg) {
+    game_object_t *invobj;
+
+    if (!has_arg(&arg)) {
+        send_to_char(c, "What do you want to use?\n");
+        return -1;
+    }
+
+    invobj = lookup_inventory_object(c, arg);
+    if (invobj && invobj->type == WEAPON_TYPE) {
+        if (remove_game_object_from_list(&c->inventory, invobj) == -1) {
+            printf("wtf?\n");
+            return -1;
+        }
+
+        if (c->weapon) {
+            /* put old weapon back in inventory */
+            c->weapon->next = c->inventory;
+            c->inventory = c->weapon;
+        }
+
+        invobj->next = NULL;
+        c->weapon = invobj;
+
+        send_object_interaction(c, invobj, "\n%s equipped '%s'\n", "You equipped '%s'\n");
+    } else if (invobj && invobj->type != WEAPON_TYPE) {
+        send_to_char(c, "You can't use that.\n");
+    } else {
+        send_to_char(c, "You aren't carrying that.\n");
+    }
+
+    return 0;
+}
+
 static int do_wear(player_t *c, char *arg) {
-    game_object_t *invobj, *cur, *prev;
+    game_object_t *invobj;
 
     if (!has_arg(&arg)) {
         send_to_char(c, "What do you want to wear?\n");
@@ -225,7 +262,6 @@ static int do_wear(player_t *c, char *arg) {
     }
 
     invobj = lookup_inventory_object(c, arg);
-    cur = prev = NULL;
 
     if (invobj && invobj->type == ARMOR_TYPE) {
         if ((c->wearing & invobj->wear_location) != 0) {
@@ -265,7 +301,7 @@ static int do_remove(player_t *c, char *arg) {
     obj = lookup_equipped_object(c, arg);
     cur = prev = NULL;
 
-    if (obj) {
+    if (obj != c->weapon) {
         if (remove_game_object_from_list(&c->equipment, obj) == -1) {
             printf("wtf?\n");
             return -1;
@@ -276,6 +312,11 @@ static int do_remove(player_t *c, char *arg) {
         c->wearing &= ~obj->wear_location;
         c->armor -= obj->armor;
 
+        send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
+    } else if (obj == c->weapon) {
+        obj->next = c->inventory;
+        c->inventory = obj;
+        c->weapon = NULL;
         send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
     } else {
         send_to_char(c, "You aren't wearing that.\n");

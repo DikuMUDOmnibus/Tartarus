@@ -97,6 +97,10 @@ void colorize_object_name(game_object_t *obj, char *writebuf) {
         color = ELITE_COLOR;
         break;
 
+    case LEGENDARY:
+        color = LEGENDARY_COLOR;
+        break;
+
     default:
         color = COMMON_COLOR;
         break;
@@ -106,7 +110,7 @@ void colorize_object_name(game_object_t *obj, char *writebuf) {
     colorize_string(msg, writebuf);
 }
 
-void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json) {
+int keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json) {
     json_t *keywords, *key;
     int numkeys, i;
 
@@ -117,13 +121,14 @@ void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json) {
         key = json_array_get(keywords, i);
         sprintf(out[i], "%s", json_string_value(key));
     }
+    return i;
 }
 
 game_object_t *game_object_from_json(json_t *json) {
     game_object_t *obj;
 
     obj = (game_object_t *)malloc(sizeof(game_object_t));
-    keywords_from_json(obj->keywords, json);
+    obj->num_keywords = keywords_from_json(obj->keywords, json);
 
     obj->is_static = json_int_from_obj_key(json, "is_static");
     obj->rarity = json_int_from_obj_key(json, "rarity");
@@ -148,7 +153,7 @@ json_t *game_object_to_json(game_object_t *obj) {
     json = json_object();
     keywords = json_array();
 
-    for (i = 0; i < MAX_KEYWORDS; ++i) {
+    for (i = 0; i < obj->num_keywords; ++i) {
         if (!obj->keywords[i] || *obj->keywords[i] == '\0')
             break;
 

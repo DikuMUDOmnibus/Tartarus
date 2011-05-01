@@ -36,10 +36,11 @@
 #include "shared.h"
 #include "color.h"
 
-#define COMMON_COLOR    ANSI_GREY
+#define COMMON_COLOR    ANSI_DGREY
 #define LIMITED_COLOR   ANSI_DGREEN
-#define RARE_COLOR      ANSI_DBLUE
-#define ELITE_COLOR     ANSI_PURPLE
+#define RARE_COLOR      ANSI_DRED
+#define ELITE_COLOR     ANSI_DBLUE
+#define LEGENDARY_COLOR ANSI_PURPLE
 
 #define WEAR_HEAD       (1 << 0)
 #define WEAR_CHEST      (1 << 1)
@@ -57,7 +58,8 @@ enum object_rarity {
     COMMON = 0,
     LIMITED,
     RARE,
-    ELITE
+    ELITE,
+    LEGENDARY
 };
 
 enum object_type {
@@ -103,7 +105,7 @@ bool object_matches_key(const game_object_t *obj, const char *key);
 int remove_game_object_from_list(game_object_t **list, game_object_t *obj);
 void colorize_object_name(game_object_t *obj, char *writebuf);
 
-void keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json);
+int keywords_from_json(char out[MAX_KEYWORD_LEN][MAX_KEYWORDS], json_t *json);
 game_object_t *game_object_from_json(json_t *json);
 json_t *game_object_to_json(game_object_t *obj);
 

@@ -123,6 +123,13 @@ int load_player_file(player_t *ch, const char *filename) {
         ch->wearing |= inv_obj->wear_location;
     }
 
+    ch->weapon = NULL;
+    js_inventory = json_object_get(jsp, "weapon");
+    if (js_inventory) {
+        inv_obj = game_object_from_json(js_inventory);
+        ch->weapon = inv_obj;
+    }
+
     json_decref(jsp);
     return 0;
 }
@@ -179,6 +186,12 @@ static char *player_json(player_t *ch) {
 
     json_object_set(jsp, "equipment", arr);
     json_decref(arr);
+
+    if (ch->weapon) {
+        jsobj = game_object_to_json(ch->weapon);
+        json_object_set(jsp, "weapon", jsobj);
+        json_decref(jsobj);
+    }
 
     res = json_dumps(jsp, JSON_INDENT(4));
     json_decref(jsp);
@@ -242,5 +255,11 @@ game_object_t *lookup_inventory_object(player_t *c, const char *key) {
 }
 
 game_object_t *lookup_equipped_object(player_t *c, const char *key) {
+    /* try weapon first */
+    if (c->weapon) {
+        if (object_matches_key(c->weapon, key))
+            return c->weapon;
+    }
+
     return lookup_object(c->equipment, key);
 }

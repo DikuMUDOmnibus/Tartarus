@@ -471,6 +471,7 @@ static int handle_input(player_t *c) {
                 c->ch_state = CHAR_STANDING;
                 c->inventory = NULL;
                 c->equipment = NULL;
+                c->weapon = NULL;
 
                 if (save_player_file(c) == -1) {
                     close(c->sfd);
