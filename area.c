@@ -155,7 +155,7 @@ int room_description(room_t *room, player_t *ch, char *buf) {
 
     npc_t *npc;
     for (npc = room->npcs; npc; npc = npc->next_in_room) {
-        n += sprintf(buf+n, "%s\n", npc->name);
+        n += sprintf(buf+n, "%s%s&D\n", npc->color, npc->name);
     }
 
     player_t *p;

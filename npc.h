@@ -38,6 +38,7 @@
 
 typedef struct npc_s {
     char name[MAX_NAME_LEN];
+    char color[8];
     int area_id;
     int room_id;
 

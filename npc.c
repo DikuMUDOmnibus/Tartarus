@@ -71,6 +71,8 @@ int load_npc_file(npc_t *npc, const char *filename) {
         return -1;
 
     sprintf(npc->name, "%s", json_str_from_obj_key(jsp, "name"));
+    sprintf(npc->color, "%s", json_str_from_obj_key(jsp, "color"));
+
     npc->area_id = json_int_from_obj_key(jsp, "area_id");
     npc->room_id = json_int_from_obj_key(jsp, "room_id");
     npc->ch_state = json_int_from_obj_key(jsp, "ch_state");

@@ -221,20 +221,21 @@ static void load_areas(void) {
 
 static void load_npcs(void) {
     /* proof-of-concept */
-    npc_t *simple, *mobile;
+    npc_t *gatekeeper, *demon;
 
-    simple = (npc_t *)malloc(sizeof(npc_t));
-    load_npc_file(simple, "simple.js");
+    gatekeeper = (npc_t *)malloc(sizeof(npc_t));
+    load_npc_file(gatekeeper, "gatekeeper.js");
 
-    mobile = (npc_t *)malloc(sizeof(npc_t));
-    load_npc_file(mobile, "mobile.js");
+    demon = (npc_t *)malloc(sizeof(npc_t));
+    load_npc_file(demon, "demon.js");
 
-    room_t *npc_room = area_table[simple->area_id]->rooms[simple->room_id];
-    add_npc_to_room(npc_room, simple);
-    npc_table[0] = simple;
+    room_t *npc_room = area_table[gatekeeper->area_id]->rooms[gatekeeper->room_id];
+    add_npc_to_room(npc_room, gatekeeper);
+    npc_table[0] = gatekeeper;
 
-    add_npc_to_room(npc_room, mobile);
-    npc_table[1] = mobile;
+    npc_room = area_table[demon->area_id]->rooms[demon->room_id];
+    add_npc_to_room(npc_room, demon);
+    npc_table[1] = demon;
 }
 
 static void daemonize(void) {
