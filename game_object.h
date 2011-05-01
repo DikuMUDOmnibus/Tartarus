@@ -86,6 +86,9 @@ typedef struct game_object_s {
 
     /* how much armor this object provides */
     int armor;
+
+    /* how much damage this can deal */
+    int damage;
     struct game_object_s *next;
 } game_object_t;
 

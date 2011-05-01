@@ -100,6 +100,8 @@ int load_player_file(player_t *ch, const char *filename) {
     ch->room_id = json_int_from_obj_key(jsp, "room_id");
     ch->ch_state = json_int_from_obj_key(jsp, "ch_state");
     ch->armor = json_int_from_obj_key(jsp, "armor");
+    ch->str = json_int_from_obj_key(jsp, "str");
+    ch->damage = json_int_from_obj_key(jsp, "damage");
 
     ch->inventory = NULL;
     ch->equipment = NULL;
@@ -165,6 +167,15 @@ static char *player_json(player_t *ch) {
 
     val = json_integer(ch->armor);
     json_object_set(jsp, "armor", val);
+    json_decref(val);
+
+
+    val = json_integer(ch->str);
+    json_object_set(jsp, "str", val);
+    json_decref(val);
+
+    val = json_integer(ch->damage);
+    json_object_set(jsp, "damage", val);
     json_decref(val);
 
     arr = json_array();

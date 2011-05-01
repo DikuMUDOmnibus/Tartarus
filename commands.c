@@ -326,7 +326,6 @@ static int do_remove(player_t *c, char *arg) {
 }
 
 static int do_look(player_t *c, char *arg) {
-    /* TODO: arg can be NULL or whatever the player wants to look at */
     char buf[MAXBUF];
     room_t *room;
 

@@ -25,6 +25,7 @@
                     "rarity": 1,
                     "type": 0,
                     "armor": 0,
+                    "damage": 10,
                     "keywords": ["nail", "bat", "nail bat"]
                 }
             ]
@@ -71,6 +72,7 @@
                     "rarity": 0,
                     "type": 0,
                     "armor": 0,
+                    "damage": 5,
                     "keywords": ["knife", "rusty", "steak", "steak knife", "rusty steak knife"]
                 }
             ]
@@ -107,6 +109,7 @@
                     "rarity": 0,
                     "type": 0,
                     "armor": 0,
+                    "damage": 15,
                     "keywords": ["bronze", "short", "sword", "short sword", "bronze sword", "bronze short sword"]
                 }
             ]

@@ -86,6 +86,9 @@ typedef struct player_s {
     unsigned int wearing;       /* bitfield of wear locations being used */
 
     int armor;
+    int str;
+    /* how much damage the player can deal */
+    int damage;
 } player_t;
 
 extern player_t *players;
