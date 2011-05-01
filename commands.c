@@ -313,7 +313,7 @@ static int do_remove(player_t *c, char *arg) {
         c->armor -= obj->armor;
 
         send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
-    } else if (obj == c->weapon) {
+    } else if (obj && obj == c->weapon) {
         obj->next = c->inventory;
         c->inventory = obj;
         c->weapon = NULL;
