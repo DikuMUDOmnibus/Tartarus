@@ -151,6 +151,30 @@ void strlower(char *str) {
     }
 }
 
+char *char_status_string(enum character_states ch_state) {
+    switch (ch_state) {
+    case CHAR_DEAD:
+        return CHAR_DEAD_STR;
+        break;
+    case CHAR_DYING:
+        return CHAR_DYING_STR;
+        break;
+    case CHAR_SLEEPING:
+        return CHAR_SLEEPING_STR;
+        break;
+    case CHAR_SITTING:
+        return CHAR_SITTING_STR;
+        break;
+    case CHAR_STANDING:
+        return CHAR_STANDING_STR;
+        break;
+    case CHAR_FIGHTING:
+        return CHAR_FIGHTING_STR;
+        break;
+    }
+    return NULL;
+}
+
 /* JSON helpers */
 int json_int_from_obj_key(json_t *obj, const char *key) {
     json_t *value;

@@ -58,6 +58,13 @@ enum character_states {
     CHAR_FIGHTING
 };
 
+#define CHAR_DEAD_STR       "laying here dead."
+#define CHAR_DYING_STR      "bleeding all over the place."
+#define CHAR_SLEEPING_STR   "sleeping here quietly."
+#define CHAR_SITTING_STR    "sitting here."
+#define CHAR_STANDING_STR   "standing here."
+#define CHAR_FIGHTING_STR   "fighting for their life."
+
 void randseed(void);
 int randint(int max);
 
@@ -69,6 +76,7 @@ void colorize_string(const char *str, char *writebuf);
 
 /* string helpers */
 void strlower(char *str);
+char *char_status_string(enum character_states ch_state);
 
 /* JSON helpers */
 int json_int_from_obj_key(json_t *, const char *);

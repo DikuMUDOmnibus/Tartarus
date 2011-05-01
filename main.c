@@ -221,7 +221,7 @@ static void load_areas(void) {
 
 static void load_npcs(void) {
     /* proof-of-concept */
-    npc_t *gatekeeper, *demon;
+    npc_t *gatekeeper, *demon, *sleeper;
 
     gatekeeper = (npc_t *)malloc(sizeof(npc_t));
     load_npc_file(gatekeeper, "gatekeeper.js");
@@ -236,6 +236,12 @@ static void load_npcs(void) {
     npc_room = area_table[demon->area_id]->rooms[demon->room_id];
     add_npc_to_room(npc_room, demon);
     npc_table[1] = demon;
+
+    sleeper = (npc_t *)malloc(sizeof(npc_t));
+    load_npc_file(sleeper, "sleeping_demon.js");
+    npc_room = area_table[sleeper->area_id]->rooms[sleeper->room_id];
+    add_npc_to_room(npc_room, sleeper);
+    npc_table[2] = sleeper;
 }
 
 static void daemonize(void) {
