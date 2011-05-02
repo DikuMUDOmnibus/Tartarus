@@ -51,6 +51,7 @@ static int do_equipment(player_t *ch, char *arg);
 static int do_inventory(player_t *ch, char *arg);
 static int do_kill(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
+static int do_loot(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
 static int do_use(player_t *ch, char *arg);
@@ -83,6 +84,7 @@ static struct command_s commands[] = {
 
     {"l", do_look},
     {"look", do_look},
+    {"loot", do_loot},
 
     {"n", do_north},
     {"north", do_north},
@@ -326,6 +328,35 @@ static int do_remove(player_t *c, char *arg) {
         send_object_interaction(c, obj, "\n%s removed '%s'\n", "You removed '%s'\n");
     } else {
         send_to_char(c, "You aren't wearing that.\n");
+    }
+
+    return 0;
+}
+
+static int do_loot(player_t *c, char *arg) {
+    char buf[MAXBUF];
+    room_t *room;
+    npc_t *npc;
+
+    if (!has_arg(&arg)) {
+        send_to_char(c, "Which corpse do you want to loot?\n");
+        return -1;
+    }
+
+    player_room(c, &room);
+    for (npc = room->npcs; npc; npc = npc->next_in_room) {
+        if (npc_matches_key(npc, arg))
+            break;
+    }
+
+    if (npc && npc->ch_state == CHAR_DEAD) {
+        sprintf(buf, "You try looting %s%s&D\n", npc->color, npc->name);
+        send_to_char(c, buf);
+    } else if (npc && npc->ch_state != CHAR_DEAD) {
+        sprintf(buf, "You can't loot %s%s&D until they're dead!\n", npc->color, npc->name);
+        send_to_char(c, buf);
+    } else {
+        send_to_char(c, "Who are you trying to loot?\n");
     }
 
     return 0;

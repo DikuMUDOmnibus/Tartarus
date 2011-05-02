@@ -83,6 +83,7 @@ typedef struct player_s {
     game_object_t *inventory;   /* pointer to head of inventory */
     game_object_t *equipment;   /* worn objects, not in inventory */
     game_object_t *weapon;
+    game_object_t *keychain;    /* separate list of keys */
     unsigned int wearing;       /* bitfield of wear locations being used */
 
     int armor;
