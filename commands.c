@@ -400,7 +400,7 @@ static int do_remove(player_t *c, char *arg) {
 
 static int do_loot(player_t *c, char *arg) {
     char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
-    int n, bytes;
+    int n;
     room_t *room;
     npc_t *npc;
     game_object_t *obj, *next;
@@ -417,7 +417,6 @@ static int do_loot(player_t *c, char *arg) {
     }
 
     if (npc && npc->ch_state == CHAR_DEAD) {
-        bytes = 0;
         obj = npc->inventory;
         npc->inventory = NULL;
 
@@ -432,13 +431,12 @@ static int do_loot(player_t *c, char *arg) {
             }
 
             colorize_object_name(obj, objname);
-            n = snprintf(buf+bytes, MAXBUF-bytes, "Looted: %s\n", objname);
-            bytes += n;
+            n += snprintf(buf+n, MAXBUF-n, "Looted: %s\n", objname);
 
             obj = next;
         }
 
-        if (bytes)
+        if (n)
             send_to_char(c, buf);
         else
             send_to_char(c, "That corpse has nothing to loot.\n");
@@ -504,7 +502,7 @@ static int try_look_at_npc(player_t *c, char *arg) {
     /* called from do_look -- try to find an npc by keyword `arg` */
     char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
     char *npc_state;
-    int n, bytes;
+    int n;
     npc_t *npc;
     room_t *room;
     game_object_t *obj;
@@ -518,24 +516,19 @@ static int try_look_at_npc(player_t *c, char *arg) {
     if (!npc)
         return -1;
 
-    bytes = 0;
     npc_state = char_status_string(npc->ch_state);
     n = snprintf(buf, MAXBUF, "%s%s&D is %s\n", npc->color, npc->name, npc_state);
-    bytes += n;
 
     if (npc->inventory) {
-        n = snprintf(buf+bytes, MAXBUF-bytes, "Carrying:\n");
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "Carrying:\n");
     }
 
     for (obj = npc->inventory; obj; obj = obj->next) {
         colorize_object_name(obj, objname);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", objname);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  %s\n", objname);
     }
 
-    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
-    bytes += n;
+    n += snprintf(buf+n, MAXBUF-n, "\n");
 
     send_to_char(c, buf);
 
@@ -566,61 +559,54 @@ static int do_inventory(player_t *c, char *arg) {
      *       the "best" practice is to malloc more space and use
      *       n to determine how many more bytes are needed.
      */
-    int n, bytes, empty;
+    int n, empty;
     char buf[MAXBUF], obj_name[MAX_NAME_LEN * 2];
     game_object_t *obj;
 
     n = snprintf(buf, MAXBUF, "Inventory:\n");
-    bytes = n;
     empty = 1;
 
     for (obj = c->inventory; obj; obj = obj->next) {
         empty = 0;
         colorize_object_name(obj, obj_name);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", obj_name);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  %s\n", obj_name);
     }
 
     for (obj = c->keychain; obj; obj = obj->next) {
         empty = 0;
         colorize_object_name(obj, obj_name);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", obj_name);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  %s\n", obj_name);
     }
 
     if (empty) {
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  You aren't carrying anything.\n");
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  You aren't carrying anything.\n");
     }
 
-    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
+    n += snprintf(buf+n, MAXBUF-n, "\n");
     send_to_char(c, buf);
 
     return 0;
 }
 
 static int do_equipment(player_t *c, char *arg) {
-    int n, bytes, empty;
+    int n, empty;
     char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
     game_object_t *obj;
 
     n = snprintf(buf, MAXBUF, "Equipment:\n");
-    bytes = n;
     empty = 1;
 
     for (obj = c->equipment; obj; obj = obj->next) {
         empty = 0;
         colorize_object_name(obj, objname);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", objname);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  %s\n", objname);
     }
 
     if (empty) {
-        n = snprintf(buf+bytes, MAXBUF-bytes, "  You aren't wearing anything.\n");
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "  You aren't wearing anything.\n");
     }
 
-    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
+    n += snprintf(buf+n, MAXBUF-n, "\n");
     send_to_char(c, buf);
 
     return 0;
