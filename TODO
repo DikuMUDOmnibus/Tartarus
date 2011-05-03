@@ -1,0 +1,3 @@
+During a game tick, re-lock all unlocked doors.
+    - this involves having a separate array for altering locked state
+      and copying over the original state into it.
