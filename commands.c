@@ -249,15 +249,27 @@ static int do_unlock(player_t *c, char *arg) {
         return -1;
     }
 
+    player_room(c, &cur);
+
     for (i = 0; i < MAX_ROOM_EXITS; ++i) {
         if (strncasecmp(exit_names[i], arg, strlen(arg)) == 0)
             break;
     }
 
-    player_room(c, &cur);
+    if (cur->exits[i] < 0) {
+        /* make sure the exit actually exists */
+        send_to_char(c, "There isn't a door there!\n");
+        return -1;
+    }
+
+    if (i >= MAX_ROOM_EXITS) {
+        send_to_char(c, "Which door do you want to unlock?\n");
+        return -1;
+    }
+
     if (cur->locked_exits[i] == 0) {
         send_to_char(c, "That exit isn't locked.\n");
-        return 0;
+        return -1;
     }
 
     for (key = c->keychain; key; key = key->next) {
