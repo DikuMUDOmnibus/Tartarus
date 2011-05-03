@@ -23,5 +23,6 @@ tartarus: $(OBJECTS)
 
 clean:
 	@echo Cleaning up.
-	rm -f *.o; rm tartarus; rm -f jansson/*.o; rm jansson/libjansson.a;
+	rm -f *.o; rm tartarus;
+	rm -f jansson/*.o; rm jansson/libjansson.a
 	@echo Done.
