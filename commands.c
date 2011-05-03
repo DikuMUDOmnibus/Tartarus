@@ -256,14 +256,14 @@ static int do_unlock(player_t *c, char *arg) {
             break;
     }
 
-    if (cur->exits[i] < 0) {
-        /* make sure the exit actually exists */
-        send_to_char(c, "There isn't a door there!\n");
+    if (i >= MAX_ROOM_EXITS) {
+        send_to_char(c, "Which door do you want to unlock?\n");
         return -1;
     }
 
-    if (i >= MAX_ROOM_EXITS) {
-        send_to_char(c, "Which door do you want to unlock?\n");
+    if (cur->exits[i] < 0) {
+        /* make sure the exit actually exists */
+        send_to_char(c, "There isn't a door there!\n");
         return -1;
     }
 
@@ -280,7 +280,7 @@ static int do_unlock(player_t *c, char *arg) {
         }
     }
 
-    if (cur->locked_exits[i] == 0) {
+    if (key && cur->locked_exits[i] == 0) {
         snprintf(buf, MAXBUF, "Unlocked door to the %s.\n", exit_names[i]);
         send_to_char(c, buf);
     } else {
