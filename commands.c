@@ -500,16 +500,61 @@ static int do_kill(player_t *c, char *arg) {
     return 0;
 }
 
+static int try_look_at_npc(player_t *c, char *arg) {
+    /* called from do_look -- try to find an npc by keyword `arg` */
+    char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
+    char *npc_state;
+    int n, bytes;
+    npc_t *npc;
+    room_t *room;
+    game_object_t *obj;
+
+    player_room(c, &room);
+    for (npc = room->npcs; npc; npc = npc->next_in_room) {
+        if (npc_matches_key(npc, arg))
+            break;
+    }
+
+    if (!npc)
+        return -1;
+
+    bytes = 0;
+    npc_state = char_status_string(npc->ch_state);
+    n = snprintf(buf, MAXBUF, "%s%s&D is %s\n", npc->color, npc->name, npc_state);
+    bytes += n;
+
+    if (npc->inventory) {
+        n = snprintf(buf+bytes, MAXBUF-bytes, "Carrying:\n");
+        bytes += n;
+    }
+
+    for (obj = npc->inventory; obj; obj = obj->next) {
+        colorize_object_name(obj, objname);
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", objname);
+        bytes += n;
+    }
+
+    n = snprintf(buf+bytes, MAXBUF-bytes, "\n");
+    bytes += n;
+
+    send_to_char(c, buf);
+
+    return 0;
+}
+
 static int do_look(player_t *c, char *arg) {
     char buf[MAXBUF];
     room_t *room;
 
-    if (!arg || (arg && *arg == '\0')) {
+    if (!has_arg(&arg)) {
         room = area_table[c->area_id]->rooms[c->room_id];
         room_description(room, c, buf);
         send_to_char(c, buf);
     } else {
         /* TODO: parse arg for something to look at */
+        if (try_look_at_npc(c, arg) == 0)
+            return 0;
+
         send_to_char(c, "What are you looking at?\n");
     }
     return 0;
