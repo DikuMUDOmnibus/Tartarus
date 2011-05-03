@@ -17,5 +17,5 @@
             "keywords": ["key"]
         }
     ],
-    "keywords": ["sleeping", "demon", "sleeping demon"]
+    "keywords": ["lesser", "demon", "lesser demon"]
 }

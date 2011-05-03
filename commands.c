@@ -219,7 +219,19 @@ static int do_drop(player_t *c, char *arg) {
 
         send_object_interaction(c, userobj, "\n%s dropped '%s'\n", "You dropped '%s'\n");
     } else {
-        send_to_char(c, "You aren't carrying that.\n");
+        userobj = lookup_object_from_list(c->keychain, arg);
+        if (userobj) {
+            if (remove_game_object_from_list(&c->keychain, userobj) == -1) {
+                printf("wtf?\n");
+                return -1;
+            }
+
+            userobj->next = room->objects;
+            room->objects = userobj;
+            send_object_interaction(c, userobj, "\n%s dropped '%s'\n", "You dropped '%s'\n");
+        } else {
+            send_to_char(c, "You aren't carrying that.\n");
+        }
     }
 
     return 0;
@@ -334,9 +346,11 @@ static int do_remove(player_t *c, char *arg) {
 }
 
 static int do_loot(player_t *c, char *arg) {
-    char buf[MAXBUF];
+    char buf[MAXBUF], objname[MAX_NAME_LEN * 2];
+    int n, bytes;
     room_t *room;
     npc_t *npc;
+    game_object_t *obj, *next;
 
     if (!has_arg(&arg)) {
         send_to_char(c, "Which corpse do you want to loot?\n");
@@ -350,8 +364,31 @@ static int do_loot(player_t *c, char *arg) {
     }
 
     if (npc && npc->ch_state == CHAR_DEAD) {
-        sprintf(buf, "You try looting %s%s&D\n", npc->color, npc->name);
-        send_to_char(c, buf);
+        bytes = 0;
+        obj = npc->inventory;
+        npc->inventory = NULL;
+
+        while (obj) {
+            next = obj->next;
+            if (obj->type == KEY_TYPE) {
+                obj->next = c->keychain;
+                c->keychain = obj;
+            } else {
+                obj->next = c->inventory;
+                c->inventory = obj;
+            }
+
+            colorize_object_name(obj, objname);
+            n = snprintf(buf+bytes, MAXBUF-bytes, "Looted: %s\n", objname);
+            bytes += n;
+
+            obj = next;
+        }
+
+        if (bytes)
+            send_to_char(c, buf);
+        else
+            send_to_char(c, "That corpse has nothing to loot.\n");
     } else if (npc && npc->ch_state != CHAR_DEAD) {
         sprintf(buf, "You can't loot %s%s&D until they're dead!\n", npc->color, npc->name);
         send_to_char(c, buf);
@@ -440,6 +477,13 @@ static int do_inventory(player_t *c, char *arg) {
     empty = 1;
 
     for (obj = c->inventory; obj; obj = obj->next) {
+        empty = 0;
+        colorize_object_name(obj, obj_name);
+        n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", obj_name);
+        bytes += n;
+    }
+
+    for (obj = c->keychain; obj; obj = obj->next) {
         empty = 0;
         colorize_object_name(obj, obj_name);
         n = snprintf(buf+bytes, MAXBUF-bytes, "  %s\n", obj_name);

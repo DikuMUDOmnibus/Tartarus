@@ -37,15 +37,11 @@
 #define NPC_DATA_DIR "data/npcs"
 
 void npc_free(npc_t *npc) {
-    int i;
     game_object_t *obj;
 
     if (npc) {
-        for (i = 0; i < npc->inventory_size; ++i) {
-            obj = npc->inventory[i];
-            if (obj)
-                free(obj);
-        }
+        for (obj = npc->inventory; obj; obj = obj->next)
+            free(obj);
 
         free(npc);
     }
@@ -100,16 +96,16 @@ int load_npc_file(npc_t *npc, const char *filename) {
 
     keywords_from_json(npc->keywords, jsp);
 
-    memset(npc->inventory, 0, sizeof(npc->inventory));
+    npc->inventory = NULL;
 
     inv = json_object_get(jsp, "inventory");
     inv_size = json_array_size(inv);
-    npc->inventory_size = inv_size;
 
     for (i = 0; i < inv_size; ++i) {
         json_t *js_inventory = json_array_get(inv, i);
         inv_obj = game_object_from_json(js_inventory);
-        npc->inventory[i] = inv_obj;
+        inv_obj->next = npc->inventory;
+        npc->inventory = inv_obj;
     }
 
     json_decref(jsp);

@@ -471,6 +471,7 @@ static int handle_input(player_t *c) {
                 c->ch_state = CHAR_STANDING;
                 c->inventory = NULL;
                 c->equipment = NULL;
+                c->keychain = NULL;
                 c->weapon = NULL;
                 c->armor = 0;
                 c->str = 1;

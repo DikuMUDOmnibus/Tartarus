@@ -52,7 +52,7 @@ typedef struct npc_s {
     char keywords[MAX_KEYWORD_LEN][MAX_KEYWORDS];
 
     int inventory_size;
-    game_object_t *inventory[MAX_NPC_INVENTORY];
+    game_object_t *inventory;
 
     /* can this NPC move around to different rooms? */
     bool is_mobile;

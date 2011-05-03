@@ -55,6 +55,21 @@ bool object_matches_key(const game_object_t *obj, const char *key) {
     return res;
 }
 
+game_object_t *lookup_object_from_list(game_object_t *list, const char *key) {
+    game_object_t *obj, *tmp;
+
+    obj = NULL;
+
+    for (tmp = list; tmp; tmp = tmp->next) {
+        if (object_matches_key(tmp, key)) {
+            obj = tmp;
+            break;
+        }
+    }
+
+    return obj;
+}
+
 int remove_game_object_from_list(game_object_t **list, game_object_t *obj) {
     game_object_t *cur, *prev;
 
