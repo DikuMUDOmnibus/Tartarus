@@ -52,14 +52,14 @@ static int do_inventory(player_t *ch, char *arg);
 static int do_kill(player_t *ch, char *arg);
 static int do_look(player_t *ch, char *arg);
 static int do_loot(player_t *ch, char *arg);
+static int do_quit(player_t *ch, char *arg);
+static int do_remove(player_t *ch, char *arg);
+static int do_save(player_t *ch, char *arg);
 static int do_say(player_t *ch, char *arg);
 static int do_take(player_t *ch, char *arg);
+static int do_unlock(player_t *ch, char *arg);
 static int do_use(player_t *ch, char *arg);
 static int do_wear(player_t *ch, char *arg);
-static int do_remove(player_t *ch, char *arg);
-
-static int do_quit(player_t *ch, char *arg);
-static int do_save(player_t *ch, char *arg);
 
 static int (*cmd_lookup(const char *cmd))(player_t *, char *);
 
@@ -101,6 +101,7 @@ static struct command_s commands[] = {
     {"t", do_take},
     {"take", do_take},
 
+    {"unlock", do_unlock},
     {"use", do_use},
 
     {"wear", do_wear},
@@ -232,6 +233,46 @@ static int do_drop(player_t *c, char *arg) {
         } else {
             send_to_char(c, "You aren't carrying that.\n");
         }
+    }
+
+    return 0;
+}
+
+static int do_unlock(player_t *c, char *arg) {
+    int i;
+    char buf[MAXBUF];
+    room_t *cur;
+    game_object_t *key;
+
+    if (!has_arg(&arg)) {
+        send_to_char(c, "Which door do you want to unlock?\n");
+        return -1;
+    }
+
+    for (i = 0; i < MAX_ROOM_EXITS; ++i) {
+        if (strncasecmp(exit_names[i], arg, strlen(arg)) == 0)
+            break;
+    }
+
+    player_room(c, &cur);
+    if (cur->locked_exits[i] == 0) {
+        send_to_char(c, "That exit isn't locked.\n");
+        return 0;
+    }
+
+    for (key = c->keychain; key; key = key->next) {
+        if (key->opens_area_id == cur->exit_areas[i] &&
+            key->opens_room_id == cur->exits[i]) {
+            cur->locked_exits[i] = 0;
+            break;
+        }
+    }
+
+    if (cur->locked_exits[i] == 0) {
+        snprintf(buf, MAXBUF, "Unlocked door to the %s.\n", exit_names[i]);
+        send_to_char(c, buf);
+    } else {
+        send_to_char(c, "You don't have the right key.\n");
     }
 
     return 0;
