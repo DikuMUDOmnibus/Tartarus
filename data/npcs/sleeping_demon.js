@@ -10,8 +10,8 @@
     "inventory": [
         {
             "name": "Key",
-            "area_id": 0,
-            "room_id": 8,
+            "opens_area_id": 0,
+            "opens_room_id": 8,
             "rarity": 0,
             "type": 2,
             "keywords": ["key"]

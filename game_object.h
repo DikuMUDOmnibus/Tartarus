@@ -91,6 +91,9 @@ typedef struct game_object_s {
     /* how much damage this can deal */
     int damage;
     struct game_object_s *next;
+
+    /* for keys -- unlocks the room identified by opens_area_id and opens_room_id */
+    int opens_area_id, opens_room_id;
 } game_object_t;
 
 #define MAX_GAME_OBJECTS 4096

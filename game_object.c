@@ -153,6 +153,9 @@ game_object_t *game_object_from_json(json_t *json) {
     obj->armor = json_int_from_obj_key(json, "armor");
     obj->damage = json_int_from_obj_key(json, "damage");
 
+    obj->opens_area_id = json_int_from_obj_key(json, "opens_area_id");
+    obj->opens_room_id = json_int_from_obj_key(json, "opens_room_id");
+
     if (obj->type == ARMOR_TYPE)
         obj->wear_location = json_int_from_obj_key(json, "wear_location");
     else
@@ -185,6 +188,9 @@ json_t *game_object_to_json(game_object_t *obj) {
     json_object_set(json, "armor", json_integer(obj->armor));
     json_object_set(json, "damage", json_integer(obj->damage));
     json_object_set(json, "wear_location", json_integer(obj->wear_location));
+    json_object_set(json, "opens_area_id", json_integer(obj->opens_area_id));
+    json_object_set(json, "opens_room_id", json_integer(obj->opens_room_id));
+
     json_object_set(json, "keywords", keywords);
     json_decref(keywords);
 
