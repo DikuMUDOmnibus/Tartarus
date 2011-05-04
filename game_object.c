@@ -163,7 +163,7 @@ game_object_t *game_object_from_json(json_t *json) {
     else
         obj->wear_location = 0;
 
-    sprintf(obj->name, "%s", json_str_from_obj_key(json, "name"));
+    snprintf(obj->name, MAX_NAME_LEN, "%s", json_str_from_obj_key(json, "name"));
     return obj;
 }
 

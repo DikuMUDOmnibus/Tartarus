@@ -122,7 +122,7 @@ int room_description(room_t *room, player_t *ch, char *buf) {
     /* returns a description in buf and number of bytes written to buf. */
     /* TODO: make sure bytes is less than MAXBUF */
 
-    int i, j, n, bytes;
+    int i, j, n;
     int empty = 1;
 
     if (!room) {
@@ -130,16 +130,13 @@ int room_description(room_t *room, player_t *ch, char *buf) {
     }
 
     n = snprintf(buf, MAXBUF, "\n%s\n%s\nExits: ", room->name, room->description);
-    bytes = n;
 
     for (i = 0, j = 0; i < MAX_ROOM_EXITS; ++i) {
         if (room->exits[i] > -1) {
             if (j > 0 && j < MAX_ROOM_EXITS - 1) {
-                n = snprintf(buf+bytes, MAXBUF-bytes, ", ");
-                bytes += n;
+                n += snprintf(buf+n, MAXBUF-n, ", ");
             }
-            n = snprintf(buf+bytes, MAXBUF-bytes, "%s", exit_names[i]);
-            bytes += n;
+            n += snprintf(buf+n, MAXBUF-n, "%s", exit_names[i]);
             ++j;
         }
     }
@@ -152,23 +149,19 @@ int room_description(room_t *room, player_t *ch, char *buf) {
         if (empty) {
             /* only show room items string if there are any items */
             empty = 0;
-            n = snprintf(buf+bytes, MAXBUF-bytes, "\n\nItems:");
-            bytes += n;
+            n += snprintf(buf+n, MAXBUF-n, "\n\nItems:");
         }
         colorize_object_name(roomobj, obj_name);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "\n  %s", obj_name);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "\n  %s", obj_name);
     }
 
-    n = snprintf(buf+bytes, MAXBUF-bytes, "\n\n");
-    bytes += n;
+    n += snprintf(buf+n, MAXBUF-n, "\n\n");
 
     npc_t *npc;
     char *state_str;
     for (npc = room->npcs; npc; npc = npc->next_in_room) {
         state_str = char_status_string(npc->ch_state);
-        n = snprintf(buf+bytes, MAXBUF-bytes, "%s%s&D is %s\n", npc->color, npc->name, state_str);
-        bytes += n;
+        n += snprintf(buf+n, MAXBUF-n, "%s%s&D is %s\n", npc->color, npc->name, state_str);
     }
 
     player_t *p;
@@ -180,12 +173,11 @@ int room_description(room_t *room, player_t *ch, char *buf) {
                 no_chars = 0;
                 n += sprintf(buf+n, "\nPeople in this room:");
             }
-            n = snprintf(buf+bytes, MAXBUF-bytes, "\n  %s", p->username);
-            bytes += n;
+            n += snprintf(buf+n, MAXBUF-n, "\n  %s", p->username);
         }
     }
 
-    return bytes;
+    return n;
 }
 
 game_object_t *lookup_room_object(room_t *room, const char *key) {
