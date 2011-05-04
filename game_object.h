@@ -36,7 +36,7 @@
 #include "shared.h"
 #include "color.h"
 
-#define COMMON_COLOR    ANSI_DGREY
+#define COMMON_COLOR    ANSI_GREY
 #define LIMITED_COLOR   ANSI_DGREEN
 #define RARE_COLOR      ANSI_DRED
 #define ELITE_COLOR     ANSI_DBLUE

@@ -125,6 +125,7 @@ static int has_arg(char **arg) {
     while (*p == ' ')
         ++p;
     *arg = p;
+
     return (p && *p != '\0');
 }
 
@@ -295,6 +296,8 @@ static int do_unlock(player_t *c, char *arg) {
 }
 
 static int do_use(player_t *c, char *arg) {
+    /* TODO: I'm thinking 'equip' might be a better command for equipping
+     * weapons... */
     game_object_t *invobj;
 
     if (!has_arg(&arg)) {
@@ -313,6 +316,7 @@ static int do_use(player_t *c, char *arg) {
             /* put old weapon back in inventory */
             c->weapon->next = c->inventory;
             c->inventory = c->weapon;
+            c->damage -= c->weapon->damage;
         }
 
         invobj->next = NULL;
