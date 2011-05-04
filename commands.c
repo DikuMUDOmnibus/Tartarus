@@ -118,6 +118,10 @@ static int has_arg(char **arg) {
      * its pointer and return the updated string to caller.
      */
     char *p = *arg;
+
+    if (!p)
+        return 0;
+
     while (*p == ' ')
         ++p;
     *arg = p;
