@@ -1,3 +1,21 @@
-During a game tick, re-lock all unlocked doors.
-    - this involves having a separate array for altering locked state
-      and copying over the original state into it.
+GAME TICK:
+----------
+    - During a game tick, re-lock all unlocked doors.
+        - this involves having a separate array for altering locked state
+          and copying over the original state into it.
+    - Decay corpses over time.
+    - Decay temporary magical effects over time.
+    - Need to reset area data like room items.
+
+GAMEPLAY:
+---------
+    - Add sacrifices to the gods.
+        - for gold coins or random items.
+    - Wear locations need to include layering/stacking of equipment.
+
+NPCs:
+------
+    - Normal NPCs should share a single file, while some NPCs use their own files.
+        - something like loading an NPC by name from a file.
+        - or maybe just have a flag in the data structure that indicates if a NPC
+          is inserted into the game at runtime.
