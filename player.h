@@ -101,6 +101,7 @@ void client_free(player_t *c);
 
 /* player.c */
 int valid_username(const char *username);
+int create_player(player_t *c, char *username);
 int load_player_file(player_t *ch, const char *filename);
 int save_player_file(player_t *ch);
 game_object_t *lookup_inventory_object(player_t *c, const char *key);

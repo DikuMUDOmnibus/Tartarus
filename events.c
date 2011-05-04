@@ -465,19 +465,7 @@ static int handle_input(player_t *c) {
             int res = load_player_file(c, c->rbuf);
             if (res == -1) {
                 /* no pfile */
-                memcpy(c->username, c->rbuf, strlen(c->rbuf));
-                c->username[strlen(c->rbuf)] = '\0';
-                c->area_id = c->room_id = 0;
-                c->ch_state = CHAR_STANDING;
-                c->inventory = NULL;
-                c->equipment = NULL;
-                c->keychain = NULL;
-                c->weapon = NULL;
-                c->armor = 0;
-                c->str = 1;
-                c->damage = 1;
-
-                if (save_player_file(c) == -1) {
+                if (create_player(c, c->rbuf) == -1) {
                     close(c->sfd);
                     client_free(c);
                     break;

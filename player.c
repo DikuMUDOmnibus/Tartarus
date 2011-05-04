@@ -81,6 +81,22 @@ int readfile(const char *filename, char **buffer) {
     return nbytes;
 }
 
+int create_player(player_t *c, char *username) {
+    memcpy(c->username, username, strlen(username));
+    c->username[strlen(username)] = '\0';
+    c->area_id = c->room_id = 0;
+    c->ch_state = CHAR_STANDING;
+    c->inventory = NULL;
+    c->equipment = NULL;
+    c->keychain = NULL;
+    c->weapon = NULL;
+    c->armor = 0;
+    c->str = 1;
+    c->damage = 1;
+
+    return save_player_file(c);
+}
+
 int load_player_file(player_t *ch, const char *filename) {
     /* takes a player_t pointer of a connected user and loads their user data */
     char path[PATH_MAX];
