@@ -447,6 +447,8 @@ static enum try_read_result try_read_network(player_t *c) {
 }
 
 static int handle_input(player_t *c) {
+    char buf[MAXBUF];
+
     switch (c->game_state) {
     case game_state_login:
         if (strlen(c->rbuf) < 32) {
@@ -462,8 +464,7 @@ static int handle_input(player_t *c) {
 
             strlower(c->rbuf);
 
-            int res = load_player_file(c, c->rbuf);
-            if (res == -1) {
+            if (load_player_file(c, c->rbuf) == -1) {
                 /* no pfile */
                 if (create_player(c, c->rbuf) == -1) {
                     close(c->sfd);
@@ -481,7 +482,6 @@ static int handle_input(player_t *c) {
             room_t *room = area_table[c->area_id]->rooms[c->room_id];
             add_player_to_room(room, c);
 
-            char buf[MAXBUF];
             snprintf(buf, MAXBUF, "\n%s has entered Tartarus.\n", c->username);
             send_to_all_except(c, buf);
 
