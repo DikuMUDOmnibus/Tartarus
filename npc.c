@@ -37,12 +37,15 @@
 #define NPC_DATA_DIR "data/npcs"
 
 void npc_free(npc_t *npc) {
-    game_object_t *obj;
+    game_object_t *obj, *next;
 
     if (npc) {
-        for (obj = npc->inventory; obj; obj = obj->next)
+        obj = npc->inventory;
+        while (obj) {
+            next = obj->next;
             free(obj);
-
+            obj = next;
+        }
         free(npc);
     }
 }

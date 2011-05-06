@@ -109,14 +109,47 @@ void inventory_free(player_t *c) {
         free(obj);
         obj = next;
     }
+
+    obj = c->equipment;
+    while (obj) {
+        next = obj->next;
+        free(obj);
+        obj = next;
+    }
+
+    obj = c->keychain;
+    while (obj) {
+        next = obj->next;
+        free(obj);
+        obj = next;
+    }
+
+    if (c->weapon)
+        free(c->weapon);
+}
+
+void free_player_data(player_t *c) {
+    room_t *room;
+
+    player_room(c, &room);
+
+    event_del(&c->event);
+
+    if (c->rbuf)
+        free(c->rbuf);
+    if (c->wbuf)
+        free(c->wbuf);
+
+    remove_player_from_room(room, c);
+    inventory_free(c);
+    free(c);
 }
 
 void client_free(player_t *c) {
+    /* frees a single client */
     player_t *p, *prev = NULL;
-    room_t *room;
 
     if (c) {
-        player_room(c, &room);
 
         for (p = players; p; prev = p, p = p->next) {
             if (p == c) {
@@ -131,31 +164,37 @@ void client_free(player_t *c) {
             }
         }
 
-        event_del(&c->event);
+        free_player_data(c);
+    }
+}
 
-        if (c->rbuf)
-            free(c->rbuf);
-        if (c->wbuf)
-            free(c->wbuf);
-
-        remove_player_from_room(room, c);
-        free(c);
+void free_all_players(void) {
+    player_t *p, *next;
+    p = players;
+    while (p) {
+        next = p->next;
+        free_player_data(p);
+        p = next;
     }
 }
 
 void terminate_process() {
     signal(SIGTERM, terminate_process);
 
+    free_all_players();
     free_all_areas();
     free_all_npcs();
+    free_main_base();
     exit(EXIT_SUCCESS);
 }
 
 void interrupt_process() {
     signal(SIGINT, interrupt_process);
 
+    free_all_players();
     free_all_areas();
     free_all_npcs();
+    free_main_base();
     exit(EXIT_SUCCESS);
 }
 

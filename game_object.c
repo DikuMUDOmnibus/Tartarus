@@ -183,17 +183,17 @@ json_t *game_object_to_json(game_object_t *obj) {
         json_decref(objkey);
     }
 
-    json_object_set(json, "name", json_string(obj->name));
-    json_object_set(json, "is_static", json_integer(obj->is_static));
-    json_object_set(json, "rarity", json_integer(obj->rarity));
-    json_object_set(json, "type", json_integer(obj->type));
-    json_object_set(json, "armor", json_integer(obj->armor));
-    json_object_set(json, "damage", json_integer(obj->damage));
-    json_object_set(json, "wear_location", json_integer(obj->wear_location));
+    json_object_set_new(json, "name", json_string(obj->name));
+    json_object_set_new(json, "is_static", json_integer(obj->is_static));
+    json_object_set_new(json, "rarity", json_integer(obj->rarity));
+    json_object_set_new(json, "type", json_integer(obj->type));
+    json_object_set_new(json, "armor", json_integer(obj->armor));
+    json_object_set_new(json, "damage", json_integer(obj->damage));
+    json_object_set_new(json, "wear_location", json_integer(obj->wear_location));
 
     if (obj->type == KEY_TYPE) {
-        json_object_set(json, "opens_area_id", json_integer(obj->opens_area_id));
-        json_object_set(json, "opens_room_id", json_integer(obj->opens_room_id));
+        json_object_set_new(json, "opens_area_id", json_integer(obj->opens_area_id));
+        json_object_set_new(json, "opens_room_id", json_integer(obj->opens_room_id));
     }
 
     json_object_set(json, "keywords", keywords);

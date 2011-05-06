@@ -147,6 +147,10 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
     }
 }
 
+void free_main_base(void) {
+    event_base_free(main_base);
+}
+
 void ev_main_loop(const int sfd, const int port) {
     struct sockaddr_in saddr;
     struct event ev_accept;

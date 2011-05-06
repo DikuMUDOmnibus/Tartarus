@@ -36,6 +36,7 @@
 #include "shared.h"
 #include "player.h"
 
+void free_main_base(void);
 void ev_main_loop(const int sfd, const int port);
 void ev_socket_accept(const int fd, const short which, void *arg);
 void ev_socket_read(const int fd, const short which, void *arg);

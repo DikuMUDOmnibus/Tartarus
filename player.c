@@ -164,73 +164,42 @@ static char *player_json(player_t *ch) {
      * - http://www.digip.org/jansson/doc/1.0/apiref.html */
 
     char *res;
-    json_t *jsp, *val, *arr, *jsobj;
+    json_t *jsp, *arr;
     game_object_t *obj;
 
     jsp = json_object();
 
     /* TODO: Find a better way to save player data without having to have blocks
      * like below for _every single_ property */
-    val = json_string(ch->username);
-    json_object_set(jsp, "username", val);
-    json_decref(val);
-
-    val = json_integer(ch->area_id);
-    json_object_set(jsp, "area_id", val);
-    json_decref(val);
-
-    val = json_integer(ch->room_id);
-    json_object_set(jsp, "room_id", val);
-    json_decref(val);
-
-    val = json_integer(ch->ch_state);
-    json_object_set(jsp, "ch_state", val);
-    json_decref(val);
-
-    val = json_integer(ch->armor);
-    json_object_set(jsp, "armor", val);
-    json_decref(val);
-
-
-    val = json_integer(ch->str);
-    json_object_set(jsp, "str", val);
-    json_decref(val);
-
-    val = json_integer(ch->damage);
-    json_object_set(jsp, "damage", val);
-    json_decref(val);
+    json_object_set_new(jsp, "username", json_string(ch->username));
+    json_object_set_new(jsp, "area_id", json_integer(ch->area_id));
+    json_object_set_new(jsp, "room_id", json_integer(ch->room_id));
+    json_object_set_new(jsp, "ch_state", json_integer(ch->ch_state));
+    json_object_set_new(jsp, "armor", json_integer(ch->armor));
+    json_object_set_new(jsp, "str", json_integer(ch->str));
+    json_object_set_new(jsp, "damage", json_integer(ch->damage));
 
     arr = json_array();
     for (obj = ch->inventory; obj; obj = obj->next) {
-        jsobj = game_object_to_json(obj);
-        json_array_append(arr, jsobj);
-        json_decref(jsobj);
+        json_array_append_new(arr, game_object_to_json(obj));
     }
 
     /* add keychain objects to inventory */
     for (obj = ch->keychain; obj; obj = obj->next) {
-        jsobj = game_object_to_json(obj);
-        json_array_append(arr, jsobj);
-        json_decref(jsobj);
+        json_array_append_new(arr, game_object_to_json(obj));
     }
 
-    json_object_set(jsp, "inventory", arr);
-    json_decref(arr);
+    json_object_set_new(jsp, "inventory", arr);
 
     arr = json_array();
     for (obj = ch->equipment; obj; obj = obj->next) {
-        jsobj = game_object_to_json(obj);
-        json_array_append(arr, jsobj);
-        json_decref(jsobj);
+        json_array_append_new(arr, game_object_to_json(obj));
     }
 
-    json_object_set(jsp, "equipment", arr);
-    json_decref(arr);
+    json_object_set_new(jsp, "equipment", arr);
 
     if (ch->weapon) {
-        jsobj = game_object_to_json(ch->weapon);
-        json_object_set(jsp, "weapon", jsobj);
-        json_decref(jsobj);
+        json_object_set_new(jsp, "weapon", game_object_to_json(ch->weapon));
     }
 
     res = json_dumps(jsp, JSON_INDENT(4));
@@ -264,6 +233,8 @@ int save_player_file(player_t *c) {
     len = strlen(buf);
     nbytes = write(fd, buf, len);
     close(fd);
+
+    free(buf);
 
     if (nbytes != len)
         return -1;
