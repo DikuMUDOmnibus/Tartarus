@@ -98,7 +98,7 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
     event_base_set(main_base, &mobile_tick);
     evtimer_add(&mobile_tick, &t);
 
-    int i, j, k, last_room_id, dir = -1;
+    int i, j, last_room_id, dir = -1;
     int bfrom = 0, bto = 0;
     char frombuf[MAXBUF], tobuf[MAXBUF];
 
