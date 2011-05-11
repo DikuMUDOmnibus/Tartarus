@@ -44,6 +44,97 @@
 const char *exit_names[] = {"north", "east", "south", "west"};
 const char *reverse_exit_names[] = {"south", "west", "north", "east"};
 
+static room_queue_t *create_queue(int n) {
+    room_queue_t *q;
+    q = (room_queue_t *)malloc(sizeof(room_queue_t));
+    q->room_ids = (int *)malloc(sizeof(int) * n);
+    q->head = q->tail = 0;
+    q->size = n;
+    return q;
+}
+
+static void enqueue(room_queue_t *q, int room_id) {
+    q->room_ids[q->tail] = room_id;
+    if (q->tail == q->size)
+        q->tail = 0;
+    else
+        ++q->tail;
+}
+
+static int dequeue(room_queue_t *q) {
+    int room_id;
+    room_id = q->room_ids[q->head];
+    if (q->head == q->size)
+        q->head = 0;
+    else
+        ++q->head;
+    return room_id;
+}
+
+static int is_empty_queue(room_queue_t *q) {
+    return (q->tail == q->head);
+}
+
+enum graph_colors {
+    WHITE,
+    GRAY,
+    BLACK
+};
+
+static area_graph_data_t *area_bfs(area_t *area, room_t *source) {
+    int i, j, ui, vi;
+    area_graph_data_t *d;
+    room_queue_t *q;
+    room_t *u;
+
+    q = create_queue(area->num_rooms);
+
+    d = (area_graph_data_t *)malloc(sizeof(area_graph_data_t));
+    d->predecessors = (int *)malloc(sizeof(int) * area->num_rooms);
+    d->colors = (int *)malloc(sizeof(int) * area->num_rooms);
+    d->distances = (int *)malloc(sizeof(int) * area->num_rooms);
+
+    for (i = 0; i < area->num_rooms; ++i) {
+        d->predecessors[i] = -1;
+        d->colors[i] = WHITE;
+        d->distances[i] = 0;
+    }
+
+    d->colors[source->id] = GRAY;
+    enqueue(q, source->id);
+
+    while (!is_empty_queue(q)) {
+        ui = dequeue(q);
+        u = area->rooms[ui];
+        for (j = 0; j < MAX_ROOM_EXITS; ++j) {
+            /* iterate over adjacent rooms */
+            vi = u->exits[j];
+            if (d->colors[vi] == WHITE) {
+                d->colors[vi] = GRAY;
+                d->distances[vi] = d->distances[ui]+1;
+                d->predecessors[vi] = ui;
+                enqueue(q, vi);
+            }
+        }
+        d->colors[ui] = BLACK;
+    }
+
+    free(q->room_ids);
+    free(q);
+    return d;
+}
+
+static void print_path(area_graph_data_t *d, int u, int v) {
+    if (u == v)
+        printf("%d", u);
+    else if (d->predecessors[v] == -1)
+        printf("no path from %d to %d\n", u, v);
+    else {
+        print_path(d, u, d->predecessors[v]);
+        printf(" -> %d", v);
+    }
+}
+
 int load_area_file(area_t *area, const char *filename) {
     /* assumes area is malloc'd already */
 
@@ -80,7 +171,8 @@ int load_area_file(area_t *area, const char *filename) {
         room->id = json_int_from_obj_key(room_array_obj, "id");
         room->area_id = json_int_from_obj_key(room_array_obj, "area_id");
         sprintf(room->name, "%s", json_str_from_obj_key(room_array_obj, "name"));
-        sprintf(room->description, "%s", json_str_from_obj_key(room_array_obj, "description"));
+        sprintf(room->description, "%s",
+                json_str_from_obj_key(room_array_obj, "description"));
 
         exits = json_object_get(room_array_obj, "exits");
         exit_areas = json_object_get(room_array_obj, "exit_areas");
@@ -112,6 +204,14 @@ int load_area_file(area_t *area, const char *filename) {
 
         area->rooms[room->id] = room;
     }
+
+    /* sample bfs on this area */
+    area_graph_data_t *data;
+    data = area_bfs(area, area->rooms[0]);
+
+    printf("Sample BFS from room 0 to room 7: ");
+    print_path(data, 0, 7);
+    printf("\n");
 
     json_decref(jsp);
 

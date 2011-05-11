@@ -68,6 +68,20 @@ typedef struct area_s {
     room_t **rooms;
 } area_t;
 
+/* this struct is used for storing the results of BFS */
+typedef struct area_graph_data_s {
+    int *predecessors;
+    int *colors;
+    int *distances;
+} area_graph_data_t;
+
+typedef struct room_queue_s {
+    int *room_ids;
+    int head;
+    int tail;
+    int size;
+} room_queue_t;
+
 /* TODO: dynamically allocate based on area metadata */
 #define MAX_AREAS 16
 
