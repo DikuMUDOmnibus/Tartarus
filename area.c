@@ -84,7 +84,7 @@ area_graph_data_t *area_bfs(area_t *area, room_t *source) {
         for (j = 0; j < MAX_ROOM_EXITS; ++j) {
             /* iterate over adjacent rooms */
             vi = u->exits[j];
-            if (d->colors[vi] == VERTEX_WHITE) {
+            if (vi >= 0 && d->colors[vi] == VERTEX_WHITE) {
                 d->colors[vi] = VERTEX_GRAY;
                 d->distances[vi] = d->distances[ui]+1;
                 d->predecessors[vi] = ui;
@@ -351,6 +351,7 @@ static int is_empty_queue(room_queue_t *q) {
 }
 
 static void print_path(area_graph_data_t *d, int u, int v) {
+    /* backtracks from vertex v until u == v */
     if (u == v)
         printf("%d", u);
     else if (d->predecessors[v] == -1)

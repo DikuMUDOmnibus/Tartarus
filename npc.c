@@ -100,6 +100,8 @@ int load_npc_file(npc_t *npc, const char *filename) {
     keywords_from_json(npc->keywords, jsp);
 
     npc->inventory = NULL;
+    npc->path = NULL;
+    npc->cur_path_index = npc->num_path_nodes = 0;
 
     inv = json_object_get(jsp, "inventory");
     inv_size = json_array_size(inv);

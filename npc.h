@@ -58,6 +58,15 @@ typedef struct npc_s {
     bool is_mobile;
 
     struct npc_s *next_in_room;
+
+    /* This is the path the NPC is currently traversing, indexed from
+     * 0 to num_path_nodes in the path, path[i] is a room_id -- generated from BFS. */
+    int *path;
+
+    /* Where the npc is currently located in the path[0, ..., num_path_nodes].
+     * path[cur_path_index+1] is the next room to move to */
+    int cur_path_index;
+    int num_path_nodes;
 } npc_t;
 
 #define MAX_NPCS 1024

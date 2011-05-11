@@ -104,7 +104,29 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
 
     npc_t *npc;
     room_t *from_room, *to_room;
+    area_graph_data_t *gdata;
+    int path_nodes, path_room_id;
 
+    for (i = 0; i < MAX_NPCS; ++i) {
+        npc = npc_table[i];
+        if (npc && npc->is_mobile) {
+            npc_room(npc, &from_room);
+            if (!npc->path) {
+                printf("foo\n");
+                gdata = area_bfs(area_table[npc->area_id], from_room);
+                printf("bar\n");
+                /* count path nodes */
+                path_room_id = 7;   /* testing for now */
+                while (path_room_id != from_room->id) {
+                    ++path_nodes;
+                    path_room_id = gdata->predecessors[path_room_id];
+                }
+                printf("npc #%d: %d\n", i, path_nodes);
+            }
+        }
+    }
+
+#if 0
     for (i = 0; i < MAX_NPCS; ++i) {
         npc = npc_table[i];
         if (npc && npc->is_mobile) {
@@ -145,6 +167,7 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
             }
         }
     }
+#endif
 }
 
 void free_main_base(void) {
