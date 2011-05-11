@@ -213,6 +213,16 @@ int load_area_file(area_t *area, const char *filename) {
     print_path(data, 0, 7);
     printf("\n");
 
+    if (data) {
+        if (data->predecessors)
+            free(data->predecessors);
+        if (data->colors)
+            free(data->colors);
+        if (data->distances)
+            free(data->distances);
+        free(data);
+    }
+
     json_decref(jsp);
 
     return 0;
