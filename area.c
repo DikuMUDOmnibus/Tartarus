@@ -52,6 +52,11 @@ static int is_empty_queue(room_queue_t *q);
 static void print_path(area_graph_data_t *d, int u, int v);
 
 area_graph_data_t *area_bfs(area_t *area, room_t *source) {
+    /*
+     * Do a BFS of the `area` graph from a `source` vertex (room) and
+     * return the corresponding data. Useful data from the BFS is the
+     * predecessor tree that actually defines the path taken.
+     */
     int i, j, ui, vi;
     area_graph_data_t *d;
     room_queue_t *q;
