@@ -44,44 +44,14 @@
 const char *exit_names[] = {"north", "east", "south", "west"};
 const char *reverse_exit_names[] = {"south", "west", "north", "east"};
 
-static room_queue_t *create_queue(int n) {
-    room_queue_t *q;
-    q = (room_queue_t *)malloc(sizeof(room_queue_t));
-    q->room_ids = (int *)malloc(sizeof(int) * n);
-    q->head = q->tail = 0;
-    q->size = n;
-    return q;
-}
+/* forward declarations */
+static room_queue_t *create_queue(int n);
+static void enqueue(room_queue_t *q, int room_id);
+static int dequeue(room_queue_t *q);
+static int is_empty_queue(room_queue_t *q);
+static void print_path(area_graph_data_t *d, int u, int v);
 
-static void enqueue(room_queue_t *q, int room_id) {
-    q->room_ids[q->tail] = room_id;
-    if (q->tail == q->size)
-        q->tail = 0;
-    else
-        ++q->tail;
-}
-
-static int dequeue(room_queue_t *q) {
-    int room_id;
-    room_id = q->room_ids[q->head];
-    if (q->head == q->size)
-        q->head = 0;
-    else
-        ++q->head;
-    return room_id;
-}
-
-static int is_empty_queue(room_queue_t *q) {
-    return (q->tail == q->head);
-}
-
-enum graph_colors {
-    WHITE,
-    GRAY,
-    BLACK
-};
-
-static area_graph_data_t *area_bfs(area_t *area, room_t *source) {
+area_graph_data_t *area_bfs(area_t *area, room_t *source) {
     int i, j, ui, vi;
     area_graph_data_t *d;
     room_queue_t *q;
@@ -96,11 +66,11 @@ static area_graph_data_t *area_bfs(area_t *area, room_t *source) {
 
     for (i = 0; i < area->num_rooms; ++i) {
         d->predecessors[i] = -1;
-        d->colors[i] = WHITE;
+        d->colors[i] = VERTEX_WHITE;
         d->distances[i] = 0;
     }
 
-    d->colors[source->id] = GRAY;
+    d->colors[source->id] = VERTEX_GRAY;
     enqueue(q, source->id);
 
     while (!is_empty_queue(q)) {
@@ -109,30 +79,19 @@ static area_graph_data_t *area_bfs(area_t *area, room_t *source) {
         for (j = 0; j < MAX_ROOM_EXITS; ++j) {
             /* iterate over adjacent rooms */
             vi = u->exits[j];
-            if (d->colors[vi] == WHITE) {
-                d->colors[vi] = GRAY;
+            if (d->colors[vi] == VERTEX_WHITE) {
+                d->colors[vi] = VERTEX_GRAY;
                 d->distances[vi] = d->distances[ui]+1;
                 d->predecessors[vi] = ui;
                 enqueue(q, vi);
             }
         }
-        d->colors[ui] = BLACK;
+        d->colors[ui] = VERTEX_BLACK;
     }
 
     free(q->room_ids);
     free(q);
     return d;
-}
-
-static void print_path(area_graph_data_t *d, int u, int v) {
-    if (u == v)
-        printf("%d", u);
-    else if (d->predecessors[v] == -1)
-        printf("no path from %d to %d\n", u, v);
-    else {
-        print_path(d, u, d->predecessors[v]);
-        printf(" -> %d", v);
-    }
 }
 
 int load_area_file(area_t *area, const char *filename) {
@@ -353,4 +312,46 @@ void player_room(player_t *ch, room_t **r) {
 
 void npc_room(npc_t *npc, room_t **r) {
     *r = area_table[npc->area_id]->rooms[npc->room_id];
+}
+
+static room_queue_t *create_queue(int n) {
+    room_queue_t *q;
+    q = (room_queue_t *)malloc(sizeof(room_queue_t));
+    q->room_ids = (int *)malloc(sizeof(int) * n);
+    q->head = q->tail = 0;
+    q->size = n;
+    return q;
+}
+
+static void enqueue(room_queue_t *q, int room_id) {
+    q->room_ids[q->tail] = room_id;
+    if (q->tail == q->size)
+        q->tail = 0;
+    else
+        ++q->tail;
+}
+
+static int dequeue(room_queue_t *q) {
+    int room_id;
+    room_id = q->room_ids[q->head];
+    if (q->head == q->size)
+        q->head = 0;
+    else
+        ++q->head;
+    return room_id;
+}
+
+static int is_empty_queue(room_queue_t *q) {
+    return (q->tail == q->head);
+}
+
+static void print_path(area_graph_data_t *d, int u, int v) {
+    if (u == v)
+        printf("%d", u);
+    else if (d->predecessors[v] == -1)
+        printf("no path from %d to %d\n", u, v);
+    else {
+        print_path(d, u, d->predecessors[v]);
+        printf(" -> %d", v);
+    }
 }

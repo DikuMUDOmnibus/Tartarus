@@ -37,6 +37,12 @@
 
 #define MAX_ROOM_EXITS 4
 
+enum graph_colors {
+    VERTEX_WHITE,
+    VERTEX_GRAY,
+    VERTEX_BLACK
+};
+
 typedef struct room_s {
     char name[MAX_NAME_LEN];
     char description[512];
@@ -103,5 +109,7 @@ void npc_room(npc_t *npc, room_t **r);
 
 void area_free(area_t *area);
 void free_all_areas(void);
+
+area_graph_data_t *area_bfs(area_t *area, room_t *source);
 
 #endif
