@@ -99,6 +99,18 @@ area_graph_data_t *area_bfs(area_t *area, room_t *source) {
     return d;
 }
 
+void free_graph_data(area_graph_data_t *data) {
+    if (data) {
+        if (data->predecessors)
+            free(data->predecessors);
+        if (data->colors)
+            free(data->colors);
+        if (data->distances)
+            free(data->distances);
+        free(data);
+    }
+}
+
 int load_area_file(area_t *area, const char *filename) {
     /* assumes area is malloc'd already */
 
@@ -167,24 +179,6 @@ int load_area_file(area_t *area, const char *filename) {
         }
 
         area->rooms[room->id] = room;
-    }
-
-    /* sample bfs on this area */
-    area_graph_data_t *data;
-    data = area_bfs(area, area->rooms[0]);
-
-    printf("Sample BFS from room 0 to room 7: ");
-    print_path(data, 0, 7);
-    printf("\n");
-
-    if (data) {
-        if (data->predecessors)
-            free(data->predecessors);
-        if (data->colors)
-            free(data->colors);
-        if (data->distances)
-            free(data->distances);
-        free(data);
     }
 
     json_decref(jsp);

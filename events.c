@@ -98,57 +98,69 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
     event_base_set(main_base, &mobile_tick);
     evtimer_add(&mobile_tick, &t);
 
-    int i, j, dir = -1;
+    int i, j, k, last_room_id, dir = -1;
     int bfrom = 0, bto = 0;
     char frombuf[MAXBUF], tobuf[MAXBUF];
 
     npc_t *npc;
     room_t *from_room, *to_room;
     area_graph_data_t *gdata;
-    int path_nodes, path_room_id;
+    int path_room_id;
 
     for (i = 0; i < MAX_NPCS; ++i) {
         npc = npc_table[i];
         if (npc && npc->is_mobile) {
             npc_room(npc, &from_room);
             if (!npc->path) {
-                printf("foo\n");
+                last_room_id = randint(area_table[npc->area_id]->num_rooms);
+                if (last_room_id == from_room->id)
+                    continue;
+
+                /* generate path data from the NPC's current room */
                 gdata = area_bfs(area_table[npc->area_id], from_room);
-                printf("bar\n");
+
+                npc->cur_path_index = 0;
+                npc->num_path_nodes = 1; /* account for last node */
+
                 /* count path nodes */
-                path_room_id = 7;   /* testing for now */
+                path_room_id = last_room_id;
                 while (path_room_id != from_room->id) {
-                    ++path_nodes;
+                    ++npc->num_path_nodes;
                     path_room_id = gdata->predecessors[path_room_id];
                 }
-                printf("npc #%d: %d\n", i, path_nodes);
-            }
-        }
-    }
 
-#if 0
-    for (i = 0; i < MAX_NPCS; ++i) {
-        npc = npc_table[i];
-        if (npc && npc->is_mobile) {
-            npc_room(npc, &from_room);
+                npc->path = (int *)malloc(sizeof(int)*npc->num_path_nodes);
 
-            for (j = 0; j < 4; ++j) {
-                /* only try to move at most 4 times */
-                dir = randint(4);
-                if (from_room->exits[dir] != -1)
-                    break;
-                else
-                    dir = -1;
-            }
+                /* copy room ids over in reverse order */
+                path_room_id = last_room_id;
+                for (j = npc->num_path_nodes-1; j >= 0; --j) {
+                    npc->path[j] = path_room_id;
+                    path_room_id = gdata->predecessors[path_room_id];
+                }
 
-            if (dir != -1) {
-                /* npc can move */
+                free_graph_data(gdata);
+            } else if (npc->path && npc->cur_path_index < npc->num_path_nodes-1) {
+                ++npc->cur_path_index;
+
+                /* get a direction (n, e, s, w) index that matches next
+                 * room in path -- it's assumed to exist because the path exists */
+                for (j = 0; j < 4; ++j) {
+                    if (from_room->exits[j] == npc->path[npc->cur_path_index]) {
+                        dir = j;
+                        break;
+                    }
+                }
+
+                if (dir == -1) {
+                    fprintf(stderr, "path dir == -1 in events.c (line: %d)\n", __LINE__);
+                    continue;
+                }
+
                 const char *todir = exit_names[dir];
                 const char *fromdir = reverse_exit_names[dir];
                 memset(tobuf, 0, MAXBUF);
                 memset(frombuf, 0, MAXBUF);
 
-                /* buffer writes until loops are complete */
                 remove_npc_from_room(from_room, npc);
                 bto = snprintf(tobuf, MAXBUF,
                                "\n%s leaves to the %s.\n", npc->name, todir);
@@ -164,10 +176,14 @@ static void ev_mobile_tick(const int fd, const short which, void *arg) {
                                  "\n%s enters from the %s.\n", npc->name, fromdir);
                 send_to_room(from_room, tobuf);
                 send_to_room(to_room, frombuf);
+            } else if (npc->path && npc->cur_path_index >= npc->num_path_nodes-1) {
+                free(npc->path);
+                npc->path = NULL;
+            } else {
+                fprintf(stderr, "Something fucked up in events.c (line: %d)\n", __LINE__);
             }
         }
     }
-#endif
 }
 
 void free_main_base(void) {

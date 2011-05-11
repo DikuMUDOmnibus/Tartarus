@@ -111,5 +111,6 @@ void area_free(area_t *area);
 void free_all_areas(void);
 
 area_graph_data_t *area_bfs(area_t *area, room_t *source);
+void free_graph_data(area_graph_data_t *data);
 
 #endif
